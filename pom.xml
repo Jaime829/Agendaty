@@ -94,10 +94,12 @@
 			<version>3.1.1</version>
 		</dependency>
 
+		<!-- Source: https://mvnrepository.com/artifact/org.modelmapper/modelmapper -->
 		<dependency>
-			<groupId>org.mapstruct</groupId>
-			<artifactId>mapstruct</artifactId>
-			<version>1.6.3</version>
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper</artifactId>
+			<version>3.2.6</version>
+			<scope>compile</scope>
 		</dependency>
 
 	</dependencies>
@@ -120,11 +122,6 @@
 						</goals>
 						<configuration>
 							<annotationProcessorPaths>
-								<path>
-									<groupId>org.mapstruct</groupId>
-									<artifactId>mapstruct-processor</artifactId>
-									<version>1.6.3</version>
-								</path>
 								<path>
 									<groupId>org.projectlombok</groupId>
 									<artifactId>lombok</artifactId>

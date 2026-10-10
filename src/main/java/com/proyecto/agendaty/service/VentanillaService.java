@@ -1,12 +1,11 @@
 package com.proyecto.agendaty.service;
 
-import com.proyecto.agendaty.dto.VentanillaDTO;
-import com.proyecto.agendaty.entity.Ventanilla;
+import com.proyecto.agendaty.dto.VentanillaRequest;
+import com.proyecto.agendaty.dto.VentanillaResponse;
 
 import java.util.List;
 
 public interface VentanillaService {
-    VentanillaDTO crearVentanilla(VentanillaDTO ventanilla);
-
-    List<VentanillaDTO> listarVentanillas();
+    VentanillaResponse crearVentanilla(VentanillaRequest ventanilla);
+    List<VentanillaResponse> listarVentanillas();
 }

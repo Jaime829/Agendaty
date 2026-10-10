@@ -1,6 +1,7 @@
 package com.proyecto.agendaty.controller;
 
-import com.proyecto.agendaty.entity.Asesor;
+import com.proyecto.agendaty.dto.AsesorRequest;
+import com.proyecto.agendaty.dto.AsesorResponse;
 import com.proyecto.agendaty.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,13 +16,11 @@ public class UsuarioController {
     private final UsuarioService service;
 
     @PostMapping("/crear-asesor/{ventanilla}")
-    public ResponseEntity<?> crearAsesor(@RequestBody Asesor asesor, @PathVariable Integer ventanilla) {
-        try {
-            Asesor asesorSaved = service.crearAsesor(asesor, ventanilla);
-            return ResponseEntity.status(HttpStatus.CREATED).body(asesorSaved);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<AsesorResponse> crearAsesor(@RequestBody AsesorRequest asesor, @PathVariable Integer ventanilla) {
+
+        AsesorResponse asesorSaved = service.crearAsesor(asesor, ventanilla);
+        return ResponseEntity.status(HttpStatus.CREATED).body(asesorSaved);
+
 
     }
 }

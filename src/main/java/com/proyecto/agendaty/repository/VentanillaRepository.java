@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface VentanillaRepository extends JpaRepository<Ventanilla, Integer> {
+    Boolean existsByNumero(Integer numero);
+
 }

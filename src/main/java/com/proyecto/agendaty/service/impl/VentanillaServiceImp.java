@@ -1,7 +1,9 @@
 package com.proyecto.agendaty.service.impl;
 
-import com.proyecto.agendaty.dto.VentanillaDTO;
+import com.proyecto.agendaty.dto.VentanillaRequest;
+import com.proyecto.agendaty.dto.VentanillaResponse;
 import com.proyecto.agendaty.entity.Ventanilla;
+import com.proyecto.agendaty.exceptions.BadRequestException;
 import com.proyecto.agendaty.mapper.VentanillaMapper;
 import com.proyecto.agendaty.repository.VentanillaRepository;
 import com.proyecto.agendaty.service.VentanillaService;
@@ -18,7 +20,11 @@ public class VentanillaServiceImp implements VentanillaService {
     private final VentanillaMapper ventanillaMapper;
 
     @Override
-    public VentanillaDTO crearVentanilla(VentanillaDTO ventanilla) {
+    public VentanillaResponse crearVentanilla(VentanillaRequest ventanilla) {
+
+        if(ventanillaRepository.existsByNumero(ventanilla.getNumero())) {
+            throw new BadRequestException("Ya existe una ventanilla con el numero " + ventanilla.getNumero());
+        }
 
         Ventanilla ventanillaSave = ventanillaRepository.save(ventanillaMapper.toEntity(ventanilla));
 
@@ -26,9 +32,11 @@ public class VentanillaServiceImp implements VentanillaService {
     }
 
     @Override
-    public List<VentanillaDTO> listarVentanillas() {
+    public List<VentanillaResponse> listarVentanillas() {
         List<Ventanilla> ventanillaList = ventanillaRepository.findAll();
 
-        return ventanillaMapper.toResponseList(ventanillaList);
+        return ventanillaList.stream()
+                .map(ventanillaMapper::toResponse)
+                .toList();
     }
 }

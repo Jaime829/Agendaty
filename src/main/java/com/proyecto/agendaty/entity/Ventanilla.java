@@ -11,7 +11,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "ventanillas")
 public class Ventanilla {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "numero", unique = true)
     private Integer numero;
 
     @Column(name = "descripcion", length = 255)

@@ -15,20 +15,35 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException e) {
+
         Map<String, String> errors = new HashMap<>();
 
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
+        e.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
 
-        response.put("timestamp", LocalDateTime.now().toString());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "Bad Request");
-        response.put("errors", errors); // Aquí van tus mensajes limpios
+        String errorDetails = "Errores de validacion en los siguientes campos: " + String.join(", ", errors.keySet());
+
+        ErrorResponse response = new ErrorResponse(LocalDateTime.now().toString(),HttpStatus.BAD_REQUEST.value(),"Error en las validaciones", errorDetails);
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException e) {
+
+        ErrorResponse response = new ErrorResponse(LocalDateTime.now().toString(), HttpStatus.NOT_FOUND.value(), "Recurso no encontrado", e.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException e) {
+        ErrorResponse response = new ErrorResponse(LocalDateTime.now().toString(), HttpStatus.BAD_REQUEST.value(), "Bad Request", e.getMessage());
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
