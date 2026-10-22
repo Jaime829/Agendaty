@@ -48,6 +48,7 @@ public class UsuarioServiceImp implements UsuarioService {
 
         Asesor asesorEntity = asesorMapper.toEntity(asesor);
 
+        assert asesorEntity != null;
         asesorEntity.setVentanillaActual(ventanilla);
 
         Asesor asesorSave = asesorRepository.save(asesorEntity);
