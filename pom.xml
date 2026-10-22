@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -11,24 +11,25 @@
 	<groupId>com.proyecto</groupId>
 	<artifactId>agendaty</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
+	<name>agendaty</name>
+	<description>Proyecto Agendaty</description>
+
 	<properties>
 		<java.version>25</java.version>
+		<!-- Actualizado: Versiones estables y compatibles con Java 25 y JUnit 6 -->
+		<pitest.version>1.30.0</pitest.version>
+		<pitest-junit5.version>1.2.3</pitest-junit5.version>
+		<jacoco.version>0.8.12</jacoco.version>
+		<sonar-maven.version>4.0.0.4121</sonar-maven.version>
+
+		<!-- Propiedades para SonarQube -->
+		<sonar.java.binaries>target/classes</sonar.java.binaries>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<!-- Integración de reportes de mutación en SonarQube -->
+		<sonar.mutationAnalysis.pitest.repository>PIT</sonar.mutationAnalysis.pitest.repository>
+		<sonar.mutationAnalysis.pitest.reportPath>${project.build.directory}/pit-reports/mutations.xml</sonar.mutationAnalysis.pitest.reportPath>
 	</properties>
+
 	<dependencies>
 		<!-- Web y Base de Datos -->
 		<dependency>
@@ -46,9 +47,22 @@
 
 		<!-- Documentación OpenAPI (Eliminada la duplicada) -->
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-h2console</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-			<version>2.8.5</version> <!-- Versión estable y recomendada para Spring Boot 3 -->
+			<version>3.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+			<version>3.1.1</version>
 		</dependency>
 
 		<!-- Herramientas de Desarrollo y Utilidades -->
@@ -63,6 +77,8 @@
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
+
+		<!-- Pruebas -->
 		<dependency>
 			<groupId>org.modelmapper</groupId>
 			<artifactId>modelmapper</artifactId>
@@ -76,19 +92,11 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
-		<!-- PRUEBAS: El único starter oficial de Spring Boot para testing -->
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Pitest JUnit 5 Plugin -->
 		<dependency>
 			<groupId>org.pitest</groupId>
 			<artifactId>pitest-junit5-plugin</artifactId>
@@ -140,38 +148,62 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.0</version>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
-			<!-- Configuración de Pitest compatible con Java 25 -->
+			<!-- Plugin de PITest para Pruebas de Mutación -->
 			<plugin>
 				<groupId>org.pitest</groupId>
 				<artifactId>pitest-maven</artifactId>
-				<version>1.17.4</version> <!-- Versión moderna compatible con bytecode reciente -->
+				<version>${pitest.version}</version>
 				<dependencies>
-					<!-- El motor para que Pitest entienda JUnit 5 -->
 					<dependency>
 						<groupId>org.pitest</groupId>
 						<artifactId>pitest-junit5-plugin</artifactId>
-						<version>1.2.1</version>
+						<version>${pitest-junit5.version}</version>
 					</dependency>
 				</dependencies>
 				<configuration>
+					<!-- CORREGIDO: Apuntando a tus paquetes reales de 'agendaty' -->
 					<targetClasses>
-						<param>com.tuempresa.proyecto.*</param> <!-- Cambia por tu paquete real -->
+						<param>com.proyecto.agendaty.*</param>
 					</targetClasses>
 					<targetTests>
-						<param>com.tuempresa.proyecto.*</param> <!-- Cambia por tu paquete real -->
+						<param>com.proyecto.agendaty.*</param>
 					</targetTests>
 					<outputFormats>
 						<outputFormat>XML</outputFormat>
 						<outputFormat>HTML</outputFormat>
 					</outputFormats>
+					<!-- Opcional: Evita mutar clases generadas o de configuración pesada -->
+					<excludedClasses>
+						<param>com.proyecto.agendaty.config.*</param>
+					</excludedClasses>
 				</configuration>
+			</plugin>
+
+			<!-- Plugin de SonarQube -->
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>${sonar-maven.version}</version>
 			</plugin>
 		</plugins>
 	</build>
-
 </project>
