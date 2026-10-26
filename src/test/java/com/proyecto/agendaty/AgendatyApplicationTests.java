@@ -11,7 +11,7 @@ class AgendatyApplicationTests {
 
 	@Test
 	void contextLoads() {
-		assertTrue(true);
+
 	}
 
 }
