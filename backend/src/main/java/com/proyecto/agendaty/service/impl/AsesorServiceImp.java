@@ -27,7 +27,7 @@ public class AsesorServiceImp implements AsesorService {
     private final AsesorMapper asesorMapper;
 
     @Override
-    public AsesorResponse crearAsesor(AsesorRequest asesor, Integer numeroVentanilla) {
+    public AsesorResponse crearAsesor(AsesorRequest asesor, Long numeroVentanilla) {
 
         Ventanilla ventanilla = ventanillaRepository.findById(numeroVentanilla)
                 .orElseThrow(()-> new ResourceNotFoundException("La ventanilla " + numeroVentanilla.toString() + " no existe, primero debes crearla"));

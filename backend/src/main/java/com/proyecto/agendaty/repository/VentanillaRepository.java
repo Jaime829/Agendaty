@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface VentanillaRepository extends JpaRepository<Ventanilla, Integer> {
+public interface VentanillaRepository extends JpaRepository<Ventanilla, Long> {
     Boolean existsByNumero(Integer numero);
 
 }

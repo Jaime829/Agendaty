@@ -39,4 +39,28 @@ public class VentanillaServiceImp implements VentanillaService {
                 .map(ventanillaMapper::toResponse)
                 .toList();
     }
+
+    @Override
+    public VentanillaResponse obtenerVentanilla(Long id) {
+        Ventanilla v = ventanillaRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("Ventanilla " + id + " no encontrada"));
+        return ventanillaMapper.toResponse(v);
+    }
+
+    @Override
+    public VentanillaResponse actualizarVentanilla(Long id, VentanillaRequest request) {
+        Ventanilla v = ventanillaRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("Ventanilla " + id + " no encontrada"));
+        v.setNumero(request.getNumero());
+        v.setDescripcion(request.getDescripcion());
+        return ventanillaMapper.toResponse(ventanillaRepository.save(v));
+    }
+
+    @Override
+    public void eliminarVentanilla(Long id) {
+        if (!ventanillaRepository.existsById(id)) {
+            throw new BadRequestException("Ventanilla " + id + " no encontrada");
+        }
+        ventanillaRepository.deleteById(id);
+    }
 }

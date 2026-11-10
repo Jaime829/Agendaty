@@ -8,4 +8,7 @@ import java.util.List;
 public interface VentanillaService {
     VentanillaResponse crearVentanilla(VentanillaRequest ventanilla);
     List<VentanillaResponse> listarVentanillas();
+    VentanillaResponse obtenerVentanilla(Long id);
+    VentanillaResponse actualizarVentanilla(Long id, VentanillaRequest request);
+    void eliminarVentanilla(Long id);
 }
