@@ -3,24 +3,25 @@ package com.proyecto.agendaty.controller;
 import com.proyecto.agendaty.dto.AsesorRequest;
 import com.proyecto.agendaty.dto.AsesorResponse;
 import com.proyecto.agendaty.service.AsesorService;
-import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/usuarios")
-@RequiredArgsConstructor
+@RequestMapping("/usuarios")
+@CrossOrigin(origins = "http://localhost:5173")
 public class UsuarioController {
 
     private final AsesorService service;
 
-    @PostMapping("/crear-asesor/{ventanilla}")
-    public ResponseEntity<AsesorResponse> crearAsesor(@RequestBody AsesorRequest asesor, @PathVariable Integer ventanilla) {
+    public UsuarioController(AsesorService service) {
+        this.service = service;
+    }
 
-        AsesorResponse asesorSaved = service.crearAsesor(asesor, ventanilla);
-        return ResponseEntity.status(HttpStatus.CREATED).body(asesorSaved);
-
-
+    @PostMapping("/asesores/{numeroVentanilla}")
+    public ResponseEntity<AsesorResponse> crearAsesor(@Valid @RequestBody AsesorRequest asesor,
+                                                      @PathVariable Long numeroVentanilla) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.crearAsesor(asesor, numeroVentanilla));
     }
 }

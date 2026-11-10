@@ -5,19 +5,21 @@ import com.proyecto.agendaty.dto.CiudadanoResponse;
 import com.proyecto.agendaty.dto.CiudadanoUpdateRequest;
 import com.proyecto.agendaty.service.CiudadanoService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/ciudadanos")
-@RequiredArgsConstructor
+@RequestMapping("/ciudadanos")
+@CrossOrigin(origins = "http://localhost:5173")
 public class CiudadanoController {
 
     private final CiudadanoService service;
+
+    public CiudadanoController(CiudadanoService service) {
+        this.service = service;
+    }
 
     @PostMapping
     public ResponseEntity<CiudadanoResponse> crear(@Valid @RequestBody CiudadanoRequest request) {

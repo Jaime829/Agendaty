@@ -4,54 +4,47 @@ import com.proyecto.agendaty.dto.AtencionRequest;
 import com.proyecto.agendaty.dto.AtencionResponse;
 import com.proyecto.agendaty.service.AtencionService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/atenciones")
-@RequiredArgsConstructor
+@RequestMapping("/atenciones")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AtencionController {
 
-    private final AtencionService atencionService;
+    private final AtencionService service;
+
+    public AtencionController(AtencionService service) {
+        this.service = service;
+    }
 
     @PutMapping("/iniciar")
-    @PreAuthorize("hasRole('ASESOR')")
-    public ResponseEntity<AtencionResponse> iniciarAtencion(
-            @RequestParam Long turnoId,
-            @RequestParam Integer asesorId) {
-        return ResponseEntity.ok(atencionService.iniciarAtencion(turnoId, asesorId));
+    public ResponseEntity<AtencionResponse> iniciar(@RequestParam Long turnoId,
+                                                    @RequestParam Integer asesorId) {
+        return ResponseEntity.ok(service.iniciarAtencion(turnoId, asesorId));
     }
 
     @PutMapping("/{turnoId}/pausar")
-    @PreAuthorize("hasRole('ASESOR')")
-    public ResponseEntity<AtencionResponse> pausarAtencion(
-            @PathVariable Long turnoId,
-            @RequestParam Integer asesorId) {
-        return ResponseEntity.ok(atencionService.pausarAtencion(turnoId, asesorId));
+    public ResponseEntity<AtencionResponse> pausar(@PathVariable Long turnoId,
+                                                   @RequestParam Integer asesorId) {
+        return ResponseEntity.ok(service.pausarAtencion(turnoId, asesorId));
     }
 
     @PutMapping("/{turnoId}/reanudar")
-    @PreAuthorize("hasRole('ASESOR')")
-    public ResponseEntity<AtencionResponse> reanudarAtencion(
-            @PathVariable Long turnoId,
-            @RequestParam Integer asesorId) {
-        return ResponseEntity.ok(atencionService.reanudarAtencion(turnoId, asesorId));
+    public ResponseEntity<AtencionResponse> reanudar(@PathVariable Long turnoId,
+                                                     @RequestParam Integer asesorId) {
+        return ResponseEntity.ok(service.reanudarAtencion(turnoId, asesorId));
     }
 
     @PutMapping("/{turnoId}/finalizar")
-    @PreAuthorize("hasRole('ASESOR')")
-    public ResponseEntity<AtencionResponse> finalizarAtencion(
-            @PathVariable Long turnoId,
-            @RequestParam Integer asesorId,
-            @Valid @RequestBody AtencionRequest request) {
-        return ResponseEntity.ok(atencionService.finalizarAtencion(turnoId, asesorId, request));
+    public ResponseEntity<AtencionResponse> finalizar(@PathVariable Long turnoId,
+                                                      @RequestParam Integer asesorId,
+                                                      @Valid @RequestBody AtencionRequest request) {
+        return ResponseEntity.ok(service.finalizarAtencion(turnoId, asesorId, request));
     }
 
     @GetMapping("/turno/{turnoId}")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<AtencionResponse> obtenerAtencionPorTurno(@PathVariable Long turnoId) {
-        return ResponseEntity.ok(atencionService.obtenerAtencionPorTurno(turnoId));
+    public ResponseEntity<AtencionResponse> obtenerPorTurno(@PathVariable Long turnoId) {
+        return ResponseEntity.ok(service.obtenerAtencionPorTurno(turnoId));
     }
 }
