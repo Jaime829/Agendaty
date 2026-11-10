@@ -1,5 +1,6 @@
 package com.proyecto.agendaty.entity;
 
+import com.proyecto.agendaty.model.enums.RolUsuario;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -21,6 +22,13 @@ public abstract class Usuario {
     @Column(name = "nombre", nullable = false, length = 80)
     private String nombre;
 
+    @Column(name = "username", length = 80, unique = true)
+    private String username;
 
+    @Column(name = "password", length = 255)
+    private String password;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "rol", length = 30)
+    private RolUsuario rol;
 }

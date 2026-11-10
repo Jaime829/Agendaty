@@ -13,9 +13,13 @@ import com.proyecto.agendaty.repository.VentanillaRepository;
 import com.proyecto.agendaty.service.AsesorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AsesorServiceImp implements AsesorService {
 
     private final AsesorRepository asesorRepository;
@@ -43,5 +47,31 @@ public class AsesorServiceImp implements AsesorService {
         Asesor asesorSave = asesorRepository.save(asesorEntity);
 
         return asesorMapper.toResponse(asesorSave);
+    }
+
+    @Override
+    @Transactional
+    public List<AsesorResponse> listarAsesores() {
+        return asesorRepository.findAll().stream()
+                .map(asesorMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AsesorResponse obtenerAsesor(Integer id) {
+        Asesor asesor = asesorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Asesor " + id + " no encontrado"));
+        return asesorMapper.toResponse(asesor);
+    }
+
+    @Override
+    @Transactional
+    public AsesorResponse cambiarDisponibilidad(Integer id, Boolean disponible) {
+        Asesor asesor = asesorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Asesor " + id + " no encontrado"));
+        asesor.setDisponible(disponible);
+        Asesor guardado = asesorRepository.save(asesor);
+        return asesorMapper.toResponse(guardado);
     }
 }

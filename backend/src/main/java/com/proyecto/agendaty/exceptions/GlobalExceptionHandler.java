@@ -1,5 +1,6 @@
 package com.proyecto.agendaty.exceptions;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -46,5 +47,11 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(LocalDateTime.now().toString(), HttpStatus.BAD_REQUEST.value(), "Bad Request", e.getMessage());
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException e) {
+        ErrorResponse response = new ErrorResponse(LocalDateTime.now().toString(), HttpStatus.CONFLICT.value(), "Conflicto de integridad", e.getMostSpecificCause().getMessage());
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 }
