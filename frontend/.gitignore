@@ -1,0 +1,19 @@
+### Agendaty Frontend ###
+
+node_modules/
+.dist/
+dist/
+build/
+*.log
+.env
+.env.local
+.env.*.local
+
+### IDE ###
+.idea/
+.vscode/
+*.iws
+
+### OS ###
+.DS_Store
+Thumbs.db
