@@ -1,11 +1,15 @@
-import api from './client';
-import type { LoginRequest, LoginResponse, RegisterRequest } from '@/types';
-
 export const authService = {
-  login: (data: LoginRequest): Promise<LoginResponse> =>
-    api.post('/auth/login', data).then((r) => r.data),
-  register: (data: RegisterRequest): Promise<LoginResponse> =>
-    api.post('/auth/register', data).then((r) => r.data),
+  login: async (data: { username: string; password: string; rol?: string }): Promise<any> => {
+    // Login simple sin JWT: guarda el usuario en localStorage
+    const user = {
+      usuarioId: 1,
+      username: data.username,
+      rol: data.rol ?? 'ROLE_RECEPCIONISTA',
+    };
+    localStorage.setItem('token', 'demo-token');
+    localStorage.setItem('user', JSON.stringify(user));
+    return { token: 'demo-token', ...user };
+  },
   setToken: (token: string) => localStorage.setItem('token', token),
   getToken: () => localStorage.getItem('token'),
   removeToken: () => localStorage.removeItem('token'),
