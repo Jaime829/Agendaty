@@ -11,8 +11,14 @@ import { useAuth } from '@/hooks/useAuth';
 export default function AdministradorPage() {
   const { user, tieneRol } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!tieneRol('ADMINISTRADOR')) {
+      navigate('/');
+    }
+  }, [tieneRol, navigate]);
+
   if (!tieneRol('ADMINISTRADOR')) {
-    navigate('/');
     return null;
   }
 
