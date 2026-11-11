@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { reportesService } from '@/api';
 import { Button } from '@/components/Button';
@@ -9,8 +9,14 @@ import { useAuth } from '@/hooks/useAuth';
 export default function ReportesPage() {
   const { tieneRol } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!tieneRol('COORDINADOR') && !tieneRol('ADMINISTRADOR')) {
+      navigate('/');
+    }
+  }, [tieneRol, navigate]);
+
   if (!tieneRol('COORDINADOR') && !tieneRol('ADMINISTRADOR')) {
-    navigate('/');
     return null;
   }
 
