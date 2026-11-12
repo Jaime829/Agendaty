@@ -8,42 +8,27 @@
 
 | Documento | Contenido |
 |-----------|-----------|
-| `project-brief.md` | Especificación funcional: problema, objetivo, usuarios, módulos, reglas de negocio RN1-RN6, criterios CA1-CA5, matriz de trazabilidad |
-| `architecture.md` | Estilo arquitectónico (backend + frontend separados), diagramas Mermaid, estructura de paquetes, flujo de petición, manejo de errores, perfiles, concurrencia RN1/RN4, cálculo turno (RN3), tiempos (RN6) |
-| `design.md` | Modelo de dominio, máquina de estados del turno, numeración única de turnos, cálculo de tiempos, contratos de API, diseño de reportes, UI/UX por rol |
-| `security.md` | Autenticación JWT + Spring Security, matriz de permisos por rol, contraseñas BCrypt, CORS/CSRF, validación, rate limiting, auditoría, checklist OWASP Top 10 |
-| `decisions.md` | Decisiones técnicas (ADR-001 a ADR-013) y supuestos abiertos |
+| `project-brief.md` | Especificación funcional: problema, objetivo, usuarios, módulos, reglas RN1-RN6, criterios CA1-CA5, requisitos RA1-RA7, matriz de trazabilidad |
+| `architecture.md` | Estilo arquitectónico (backend + frontend separados), diagramas Mermaid, estructura de paquetes, flujo de petición, manejo de errores, perfiles, concurrencia RN1/RN4 |
+| `design.md` | Modelo de dominio, máquina de estados del turno, numeración única de turnos, cálculo de tiempos, contratos de API (todos los endpoints), diseño de reportes, UI/UX por rol |
+| `security.md` | Autenticación JWT-less + Spring Security simple, matriz de permisos por rol (RA7), contraseñas BCrypt (RA5), CORS/CSRF, validación, checklist OWASP Top 10 |
+| `decisions.md` | Decisiones técnicas (ADR-001 a ADR-010) y supuestos abiertos |
 
----
-
-## Documentos de implementación y operación (Fase 9)
+## Documentos de implementación y operación (Fase 7)
 
 | Documento | Contenido |
 |-----------|-----------|
-| `api.md` | Referencia completa de endpoints: método, ruta, roles, request, response, códigos, errores, ejemplos |
-| `setup.md` | Requisitos, variables de entorno, ejecución local (backend/frontend), pruebas, build, Docker Compose |
-| `testing.md` | Estrategia de pruebas (JUnit 5 + Mockito, Vitest), cómo ejecutarlas, mapeo RN/CA → pruebas, cobertura JaCoCo |
-| `frontend.md` | Estructura del frontend, convenciones, componentes, vistas por rol, calidad UI/UX |
-
----
+| `api.md` | Referencia completa de endpoints: método, ruta, roles, request, response, códigos, errores |
+| `setup.md` | Requisitos, variables de entorno, credenciales del admin de desarrollo, ejecución local y Docker |
+| `testing.md` | Estrategia de pruebas, cómo ejecutarlas, mapeo RN/CA/RA → tests |
+| `frontend.md` | Estructura del frontend, sistema de diseño, componentes, landing y pantallas por rol |
 
 ## Documentos del repositorio
 
 | Documento | Ubicación | Contenido |
 |-----------|-----------|-----------|
 | `README.md` | raíz | Descripción, estructura del repo, inicio rápido, enlaces a `/docs` |
-| `CHANGELOG.md` | raíz | Registro de cambios generado a partir de los commits (skill changelog-generator) |
-
----
-
-## Estructura del repositorio
-
-```
-/backend      → Spring Boot (API REST), build propio, config, README
-/frontend     → React + TypeScript + Vite, consume la API, .env.example, README
-/docs         → toda la documentación
-docker-compose.yml → backend + frontend + base de datos
-```
+| `CHANGELOG.md` | raíz | Registro de cambios (versión 1.0.0) |
 
 ## Enlaces rápidos
 

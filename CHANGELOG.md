@@ -1,41 +1,33 @@
 # Changelog — Agendaty
 
-## [1.0.0] — Versión completa (2026-11-10)
+## [1.0.0] — Versión completa (2026-11-12)
 
 ### ✨ Nuevas funcionalidades
 
-- **Gestión de turnos**: generación de turnos con número único, tipo de trámite y prioridad (normal/prioritario), estados completos (En espera, Llamado, En atención, En pausa, Finalizado, Cancelado, No atendido).
-- **Llamado de siguiente turno**: prioriza turnos prioritarios antes que normales, por orden de llegada dentro de cada grupo (RN3).
-- **Atención completa**: iniciar, pausar, reanudar y finalizar atención con observaciones y resultado obligatorio (RN5).
-- **Reglas de negocio bajo concurrencia**: un turno no atendido por dos asesores al mismo tiempo (RN1) y un asesor con un solo turno activo (RN4), mediante bloqueo pesimista (`PESSIMISTIC_WRITE`) y validación de servicio.
-- **Turno no atendido**: si el usuario no responde al llamado, el turno pasa a estado `NO_ATENDIDO` (RN2), mediante endpoint explícito y/o tarea programada.
-- **Cálculo de tiempos**: tiempo de espera (creación → llamado) y tiempo de atención (inicio → fin, descontando pausas) persistidos y expuestos (RN6).
-- **Tipos de trámite**: CRUD completo con código único y marca de prioritario por defecto.
-- **Reportes**: tiempo promedio de espera, turnos atendidos/no atendidos y trámites frecuentes, con filtros por rango de fechas, asesor y tipo de trámite.
-- **Asesores y ventanillas**: listado de asesores con disponibilidad y cambio de disponibilidad.
-- **Seguridad**: autenticación JWT con Spring Security, autorización por rol en cada endpoint, contraseñas con BCrypt, CORS explícito, auditoría de acciones sobre turnos.
+- **Autenticación y roles (RA1-RA7)**: registro público como ciudadano, login con correo+contraseña, admin sembrado automáticamente, contraseñas con BCrypt, y autorización por rol mediante header `X-Usuario-Id`.
+- **Gestión de usuarios internos (RA4)**: el administrador puede registrar asesores, recepcionistas, coordinadores y otros administradores mediante `POST /admin/usuarios`.
+- **Semilla de administrador (RA3)**: al arrancar el backend se crea automáticamente un administrador si no existe uno.
+- **Frontend completo (Fase 7)**: landing page, login, registro y dashboards por rol (recepcionista, asesor, coordinador, administrador, ciudadano, reportes) funcionando en modo mock y con backend real.
+- **Máquina de estados completa**: EN_ESPERA, LLAMADO, EN_ATENCION, EN_PAUSA, FINALIZADO, CANCELADO, NO_ATENDIDO.
 
 ### 🔧 Mejoras
 
-- Separación del repositorio en `/backend`, `/frontend` y `/docs`, cada parte ejecutable por separado.
-- Documentación completa: `project-brief.md`, `architecture.md`, `design.md`, `security.md`, `decisions.md`, `api.md`, `setup.md`, `testing.md`, `frontend.md`.
-- Pruebas unitarias JUnit 5 + Mockito: 46 tests, 100% verde, con cobertura por cada regla RN1-RN6 y criterio CA1-CA5.
-- Frontend en React + TypeScript + Vite con vistas por rol (recepcionista, asesor, coordinador, administrador, ciudadano, reportes), responsive y accesible.
+- **Backend simplificado**: arquitectura Controller → Service → Repository → Entity, con `@CrossOrigin` en cada controller y rutas cortas (sin prefijo `/api/v1`).
+- **CORS explícito**: configurado por controller con origen `http://localhost:5173`.
+- **Pruebas unitarias**: 44 pruebas JUnit 5 + Mockito, 100% verde, cubriendo RN1-RN6, CA1-CA5 y RA1-RA6.
+- **Integración verificada**: flujo completo probado con curl/PowerShell (registro, login, tipos de trámite, asesor, turnos normal y prioritario, llamar siguiente, atención iniciar/pausar/reanudar/finalizar, no atendido, reportes).
 
 ### 🐛 Correcciones
 
-- Corrección de longitud del campo `documento` en el registro de usuarios (respeta restricción de BD de 10 caracteres).
-- Manejo global de `DataIntegrityViolationException` (HTTP 409) en lugar de error 500.
-- Rutas de seguridad compatibles con `PathPatternMatcher` de Spring Security 7 (variables de ruta al final del patrón).
+- **Frontend**: `navigate()` movido a `useEffect` para evitar actualizaciones en fase de render.
+- **Frontend**: proxy de Vite eliminado para evitar conflictos con peticiones estáticas.
+- **Backend**: eliminación de JWT, Spring Security completo, Docker y mappers complejos para simplicidad.
 
 ---
 
-## [0.0.1] — Línea de base inicial (commits previos en `main`)
+## [0.0.1] — Línea de base inicial
 
 - Entidades `Usuario`, `Asesor`, `Ciudadano`, `Ventanilla` con herencia `JOINED`.
 - CRUD de ciudadanos, asesores y ventanillas.
-- Manejador de excepciones global (`GlobalExceptionHandler`) con `ErrorResponse`.
-- Validación Bean Validation en DTOs de entrada.
-- 7 pruebas unitarias iniciales (AsesorService, CiudadanoServiceImp).
-- Configuración de Pitest, JaCoCo y SonarQube en `pom.xml`.
-- Documentación OpenAPI (springdoc) y consola H2 habilitadas.
+- Manejador de excepciones global con `ErrorResponse`.
+- 37 pruebas unitarias iniciales.

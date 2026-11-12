@@ -1,6 +1,6 @@
 # Agendaty
 
-Plataforma de gestión de turnos y atención al ciudadano. Backend Spring Boot 4.1.1 (Java 25) + frontend React + TypeScript + Vite, con API REST separada, seguridad JWT, reglas de negocio bajo concurrencia y reportes de tiempos de espera.
+Plataforma de gestión de turnos y atención al ciudadano. Backend Spring Boot 4.1.1 (Java 25) + frontend React + TypeScript + Vite, con API REST separada, autenticación simple, reglas de negocio bajo concurrencia y reportes de tiempos de espera.
 
 ---
 
@@ -10,7 +10,6 @@ Plataforma de gestión de turnos y atención al ciudadano. Backend Spring Boot 4
 /backend      → Spring Boot API REST (build propio, config, pruebas)
 /frontend     → React + TypeScript + Vite (consume la API)
 /docs         → documentación completa
-docker-compose.yml → backend + frontend + base de datos
 CHANGELOG.md  → registro de cambios
 README.md     → este archivo
 ```
@@ -23,19 +22,22 @@ README.md     → este archivo
 
 ```powershell
 cd backend
-# (opcional) crear backend/.env con JWT_SECRET, CORS_ALLOWED_ORIGINS, DB_PASSWORD
 ./mvnw spring-boot:run
 ```
 
-La API queda en `http://localhost:8080/api/v1` y Swagger UI en `http://localhost:8080/swagger-ui.html`.
+La API queda en `http://localhost:8080` y Swagger UI en `http://localhost:8080/swagger-ui.html`.
+
+Credenciales de administrador (seed automático):
+- Correo: `admin@turnos.local`
+- Contraseña: `Admin123*`
 
 ### Frontend
 
 ```powershell
 cd frontend
-cp .env.example .env
+cp .env.example .env   # editar VITE_API_URL=http://localhost:8080 si es necesario
 npm install
-npm run dev   # http://localhost:5173
+npm run dev            # http://localhost:5173
 ```
 
 ### Todo junto con Docker
@@ -58,6 +60,8 @@ cd frontend
 npm run test
 ```
 
+Resultado: **44 tests backend, 0 fallos, 100% verde**.
+
 ---
 
 ## Documentación
@@ -70,11 +74,11 @@ Toda la documentación está en `/docs`:
 | `docs/project-brief.md` | Especificación funcional y matriz de trazabilidad |
 | `docs/architecture.md` | Arquitectura, diagramas, concurrencia RN1/RN4 |
 | `docs/design.md` | Modelo de dominio, estados, API, UI/UX por rol |
-| `docs/security.md` | JWT, permisos por rol, OWASP Top 10 |
+| `docs/security.md` | JWT-less, permisos por rol, OWASP Top 10 |
 | `docs/decisions.md` | Decisiones técnicas (ADR) |
 | `docs/api.md` | Referencia de endpoints |
 | `docs/setup.md` | Instalación, variables de entorno, Docker |
-| `docs/testing.md` | Estrategia de pruebas y mapeo RN/CA → tests |
+| `docs/testing.md` | Estrategia de pruebas y mapeo RN/CA/RA → tests |
 | `docs/frontend.md` | Estructura y convenciones del frontend |
 
 ---
@@ -89,6 +93,16 @@ Toda la documentación está en `/docs`:
 | RN4 | Un asesor solo puede tener un turno activo |
 | RN5 | Atención finalizada requiere resultado registrado |
 | RN6 | Cálculo y persistencia de tiempos de espera y atención |
+
+### Requisitos adicionales (RA)
+
+- RA1: Registro público con rol CIUDADANO forzado
+- RA2: Login con correo + contraseña
+- RA3: Admin sembrado automáticamente (CommandLineRunner)
+- RA4: Admin registra usuarios internos (POST /admin/usuarios)
+- RA5: Contraseñas con BCrypt
+- RA6: Autorización por rol con header X-Usuario-Id
+- RA7: Matriz de permisos rol × acción
 
 ---
 

@@ -1,95 +1,90 @@
 # Referencia de API — Agendaty
 
-Base: `http://localhost:8080/api/v1` (configurable por perfil/variable de entorno).
+Base: `http://localhost:8080` (rutas cortas, sin prefijo `/api/v1`).
 Formato de error: `ErrorResponse(timeStamp, status, errorMessage, errorsDetails)`.
-Autenticación: JWT Bearer en header `Authorization: Bearer <token>`.
+Autenticación: header `X-Usuario-Id` en peticiones protegidas. Esquema didáctico (sin JWT).
 
 ---
 
-## Autenticación
+## Autenticación (RA1, RA2)
 
-| Método | Ruta | Roles | Cuerpo request | Respuesta (200/201) | Descripción |
-|--------|------|-------|----------------|---------------------|-------------|
-| POST | `/api/v1/auth/login` | Público | `LoginRequest` | `LoginResponse` | Autentica y devuelve JWT |
-| POST | `/api/v1/auth/register` | Público | `RegisterRequest` | `LoginResponse` | Registra usuario (ciudadano/admin) |
-
----
-
-## Tipos de trámite
-
-| Método | Ruta | Roles | Descripción |
-|--------|------|-------|-------------|
-| GET | `/api/v1/tipos-tramite` | Público | Listar tipos de trámite (CA1) |
-| GET | `/api/v1/tipos-tramite/{id}` | Cualquier rol autenticado | Obtener tipo de trámite |
-| POST | `/api/v1/tipos-tramite` | `ADMINISTRADOR` | Crear tipo de trámite |
-| PUT | `/api/v1/tipos-tramite/{id}` | `ADMINISTRADOR` | Actualizar tipo de trámite |
-| DELETE | `/api/v1/tipos-tramite/{id}` | `ADMINISTRADOR` | Eliminar tipo de trámite |
+| Método | Ruta | Roles | Request | Response | Códigos |
+|--------|------|-------|---------|----------|---------|
+| POST | `/auth/registro` | Público | `{nombre, correo, password, documento, telefono}` | `{id, nombre, correo, rol}` | 201, 400 |
+| POST | `/auth/login` | Público | `{correo, password}` | `{id, nombre, correo, rol}` | 200, 400 |
 
 ---
 
-## Turnos (Solicitudes / Turnos)
+## Admin (RA4, solo ADMINISTRADOR, header X-Usuario-Id)
 
-| Método | Ruta | Roles | Descripción |
-|--------|------|-------|-------------|
-| POST | `/api/v1/turnos?usuarioId=X` | `RECEPCIONISTA`, `ADMINISTRADOR` | Generar turno (CA1-CA4) |
-| GET | `/api/v1/turnos` | `RECEPCIONISTA`, `ASESOR`, `COORDINADOR`, `ADMINISTRADOR` | Listar turnos (filtros opcionales: estado, prioridad, ciudadanoId, tipoTramiteId) |
-| GET | `/api/v1/turnos/{id}` | Cualquier autenticado | Obtener turno |
-| PUT | `/api/v1/turnos/llamar-siguiente?asesorId=X` | `ASESOR` | Llamar siguiente (CA5, RN3) |
-| PUT | `/api/v1/turnos/{id}/cancelar?usuarioId=X` | `RECEPCIONISTA`, `ADMINISTRADOR` | Cancelar turno |
-| PUT | `/api/v1/turnos/{id}/no-atendido` | `RECEPCIONISTA`, `ADMINISTRADOR` | Marcar no atendido (RN2) |
+| Método | Ruta | Roles | Request | Response | Códigos |
+|--------|------|-------|---------|----------|---------|
+| POST | `/admin/usuarios` | ADMINISTRADOR | `{nombre, correo, password, documento, telefono, rol}` | `{id, nombre, correo, rol}` | 201, 400, 403 |
+
+---
+
+## Turnos
+
+| Método | Ruta | Roles | Request | Response | Códigos |
+|--------|------|-------|---------|----------|---------|
+| POST | `/turnos?usuarioId=X` | RECEPCIONISTA, ADMINISTRADOR | `{ciudadanoId, tipoTramiteId, prioritario}` | `{id, numeroTurno, estado, prioridad, ...}` | 201, 400, 403 |
+| GET | `/turnos` | Todos autenticados | — | `[{id, numeroTurno, estado, prioridad, ...}]` | 200, 403 |
+| GET | `/turnos/{id}` | Todos autenticados | — | `{id, numeroTurno, estado, ...}` | 200, 404 |
+| PUT | `/turnos/llamar-siguiente?asesorId=X` | ASESOR | — | `{id, numeroTurno, estado, prioridad, ...}` | 200, 400, 403, 404 |
+| PUT | `/turnos/{id}/cancelar?usuarioId=X` | RECEPCIONISTA, ADMINISTRADOR | — | `{id, ..., estado: CANCELADO}` | 200, 400, 403, 404 |
+| PUT | `/turnos/{id}/no-atendido` | RECEPCIONISTA, ADMINISTRADOR | — | `{id, ..., estado: NO_ATENDIDO}` | 200, 400, 403, 404 |
 
 ---
 
 ## Atención
 
-| Método | Ruta | Roles | Descripción |
-|--------|------|-------|-------------|
-| PUT | `/api/v1/atenciones/iniciar?turnoId=X&asesorId=Y` | `ASESOR` | Iniciar atención (RN1, RN4) |
-| PUT | `/api/v1/atenciones/{turnoId}/pausar?asesorId=Y` | `ASESOR` | Pausar atención |
-| PUT | `/api/v1/atenciones/{turnoId}/reanudar?asesorId=Y` | `ASESOR` | Reanudar atención |
-| PUT | `/api/v1/atenciones/{turnoId}/finalizar?asesorId=Y` | `ASESOR` | Finalizar con resultado (RN5, RN6) |
-| GET | `/api/v1/atenciones/turno/{turnoId}` | Cualquier autenticado | Obtener atención por turno |
+| Método | Ruta | Roles | Request | Response | Códigos |
+|--------|------|-------|---------|----------|---------|
+| PUT | `/atenciones/iniciar?turnoId=X&asesorId=Y` | ASESOR | — | `{id, turnoId, fechaInicio, ...}` | 200, 400, 403, 404, 409 |
+| PUT | `/atenciones/{turnoId}/pausar?asesorId=Y` | ASESOR | — | `{id, ..., estado: EN_PAUSA}` | 200, 400, 403, 404 |
+| PUT | `/atenciones/{turnoId}/reanudar?asesorId=Y` | ASESOR | — | `{id, ..., estado: EN_ATENCION}` | 200, 400, 403, 404 |
+| PUT | `/atenciones/{turnoId}/finalizar?asesorId=Y` | ASESOR | `{resultado, observaciones}` | `{id, ..., estado: FINALIZADO, tiempoEspera, tiempoAtencion}` | 200, 400, 403, 404, 409 |
+| GET | `/atenciones/turno/{turnoId}` | Todos autenticados | — | `{id, turnoId, ..., resultado, tiempoEspera, tiempoAtencion}` | 200, 404 |
 
 ---
 
 ## Asesores
 
-| Método | Ruta | Roles | Descripción |
-|--------|------|-------|-------------|
-| GET | `/api/v1/asesores` | `ASESOR`, `RECEPCIONISTA`, `COORDINADOR`, `ADMINISTRADOR` | Listar asesores |
-| GET | `/api/v1/asesores/{id}` | `ASESOR`, `RECEPCIONISTA`, `COORDINADOR`, `ADMINISTRADOR` | Obtener asesor |
-| PUT | `/api/v1/asesores/{id}/disponible?disponible=true\|false` | `ADMINISTRADOR` | Cambiar disponibilidad |
+| Método | Ruta | Roles | Request | Response | Códigos |
+|--------|------|-------|---------|----------|---------|
+| GET | `/asesores` | Todos autenticados | — | `[{id, nombre, disponible, numeroVentanilla}]` | 200, 403 |
+| PUT | `/asesores/{id}/disponible?disponible=true\|false` | ADMINISTRADOR | — | `{id, nombre, disponible}` | 200, 400, 403, 404 |
 
 ---
 
-## Ventanillas (heredadas de la línea de base)
+## Ventanillas
 
-| Método | Ruta | Roles | Descripción |
-|--------|------|-------|-------------|
-| GET | `/api/v1/ventanillas` | `ASESOR`, `RECEPCIONISTA`, `COORDINADOR`, `ADMINISTRADOR` | Listar ventanillas |
-| POST | `/api/v1/ventanillas` | `ADMINISTRADOR` | Crear ventanilla |
-| PUT | `/api/v1/ventanillas/{id}` | `ADMINISTRADOR` | Actualizar ventanilla |
-| DELETE | `/api/v1/ventanillas/{id}` | `ADMINISTRADOR` | Eliminar ventanilla |
+| Método | Ruta | Roles | Request | Response | Códigos |
+|--------|------|-------|---------|----------|---------|
+| GET | `/ventanillas` | Todos autenticados | — | `[{id, numero, descripcion, asesorId}]` | 200, 403 |
+| POST | `/ventanillas` | ADMINISTRADOR | `{numero, descripcion}` | `{id, numero, descripcion}` | 201, 400, 403 |
+| PUT | `/ventanillas/{id}` | ADMINISTRADOR | `{numero, descripcion}` | `{id, numero, descripcion}` | 200, 400, 403, 404 |
+| DELETE | `/ventanillas/{id}` | ADMINISTRADOR | — | — | 204, 403, 404 |
+
+---
+
+## Tipos de trámite
+
+| Método | Ruta | Roles | Request | Response | Códigos |
+|--------|------|-------|---------|----------|---------|
+| GET | `/tipos-tramite` | Todos autenticados | — | `[{id, nombre, codigo, prioritarioPorDefecto, activo}]` | 200, 403 |
+| POST | `/tipos-tramite` | ADMINISTRADOR | `{nombre, codigo, prioritarioPorDefecto}` | `{id, nombre, codigo, ...}` | 201, 400, 403 |
+| PUT | `/tipos-tramite/{id}` | ADMINISTRADOR | `{nombre, codigo, prioritarioPorDefecto, activo}` | `{id, nombre, codigo, ...}` | 200, 400, 403, 404 |
 
 ---
 
 ## Reportes
 
-| Método | Ruta | Roles | Filtros opcionales | Descripción |
-|--------|------|-------|--------------------|-------------|
-| GET | `/api/v1/reportes/tiempo-espera-promedio` | `COORDINADOR`, `ADMINISTRADOR` | fechaDesde, fechaHasta, asesorId, tipoTramiteId | Tiempo promedio de espera (RN6) |
-| GET | `/api/v1/reportes/turnos-atendidos` | `COORDINADOR`, `ADMINISTRADOR` | fechaDesde, fechaHasta, asesorId, tipoTramiteId | Turnos atendidos / no atendidos |
-| GET | `/api/v1/reportes/tramites-frecuentes` | `COORDINADOR`, `ADMINISTRADOR` | fechaDesde, fechaHasta, tipoTramiteId | Trámites frecuentes |
-
----
-
-## Usuarios (Administración)
-
-| Método | Ruta | Roles | Descripción |
-|--------|------|-------|-------------|
-| GET | `/api/v1/usuarios` | `ADMINISTRADOR` | Listar usuarios |
-| POST | `/api/v1/usuarios` | `ADMINISTRADOR` | Crear usuario con rol |
-| PUT | `/api/v1/usuarios/{id}/rol` | `ADMINISTRADOR` | Asignar rol |
+| Método | Ruta | Roles | Request | Response | Códigos |
+|--------|------|-------|---------|----------|---------|
+| GET | `/reportes/tiempo-espera-promedio` | COORDINADOR, ADMINISTRADOR | `fechaDesde, fechaHasta` | `{promedioMinutos, cantidad}` | 200, 403 |
+| GET | `/reportes/turnos-atendidos` | COORDINADOR, ADMINISTRADOR | `fechaDesde, fechaHasta` | `{atendidos, noAtendidos, total}` | 200, 403 |
+| GET | `/reportes/tramites-frecuentes` | COORDINADOR, ADMINISTRADOR | `fechaDesde, fechaHasta` | `[{tipoTramite, cantidad}]` | 200, 403 |
 
 ---
 
@@ -101,18 +96,7 @@ Autenticación: JWT Bearer en header `Authorization: Bearer <token>`.
 | 201 | Creado |
 | 204 | Sin contenido (eliminación) |
 | 400 | Solicitud incorrecta / regla de negocio violada |
-| 401 | No autenticado |
+| 401 | No autenticado (credenciales inválidas) |
 | 403 | No autorizado (rol insuficiente) |
 | 404 | Recurso no encontrado |
-| 409 | Conflicto de integridad (ej. documento duplicado) |
-
----
-
-## DTOs principales (resumen)
-
-- `TurnoRequest`: `ciudadanoId`, `tipoTramiteId`, `prioritario`
-- `TurnoResponse`: `id`, `numeroTurno`, `estado`, `prioridad`, `fechaCreacion`, `fechaLlamado`, `fechaFinEspera`, `ciudadanoId`, `ciudadanoNombre`, `tipoTramiteId`, `tipoTramiteNombre`, `asesorId`, `asesorNombre`
-- `AtencionRequest`: `resultado` (obligatorio), `observaciones`
-- `AtencionResponse`: `id`, `turnoId`, `numeroTurno`, `asesorId`, `asesorNombre`, `fechaInicio`, `fechaFin`, `observaciones`, `resultado`, `tiempoEsperaMinutos`, `tiempoAtencionMinutos`, `totalPausasMinutos`
-- `LoginRequest`: `username`, `password`
-- `LoginResponse`: `token`, `tipo`, `usuarioId`, `username`, `rol`
+| 409 | Conflicto (turno ya tomado, asesor con turno activo, etc.) |

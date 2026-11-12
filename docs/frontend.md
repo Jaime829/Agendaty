@@ -1,9 +1,6 @@
 # Documentación del Frontend — Agendaty
 
----
-
 ## Stack
-
 - React 18 + TypeScript + Vite
 - Tailwind CSS (estilo)
 - React Router DOM (rutas)
@@ -15,78 +12,47 @@
 
 ```
 frontend/
-├── package.json
+├── src/
+│   ├── api/           # cliente HTTP tipado (auth, turnos, atenciones, asesores, admin, reportes)
+│   ├── components/    # componentes reutilizables (Button, Input, Select, BadgeEstado, Loading, EmptyState, Alert, Navbar)
+│   ├── hooks/         # useAuth
+│   ├── pages/         # vistas por rol (Login, Registro, Recepcionista, Asesor, Coordinador, Administrador, Ciudadano, Reportes, Landing)
+│   ├── context/       # AuthContext (sesión persistida en localStorage)
+│   ├── routes/        # ProtectedRoute (rutas protegidas por rol)
+│   ├── types/         # tipos TypeScript (DTOs del backend)
+│   ├── utils/         # utilidades
+│   └── assets/        # imágenes, íconos
+├── .env.example       # VITE_API_URL, VITE_USE_MOCK, VITE_POLL_INTERVAL_MS, VITE_APP_TITLE
 ├── vite.config.ts
-├── tsconfig.json / tsconfig.node.json
-├── tailwind.config.js / postcss.config.js
-├── index.html
-├── .env.example
-├── public/
-└── src/
-    ├── main.tsx          # punto de entrada
-    ├── App.tsx           # rutas y autenticación
-    ├── index.css         # Tailwind + base
-    ├── vite-env.d.ts
-    ├── api/
-    │   ├── index.ts      # export de servicios
-    │   ├── client.ts     # axios + interceptores (token + mapeo de errores)
-    │   ├── auth.ts
-    │   ├── turnos.ts
-    │   ├── atenciones.ts
-    │   ├── asesores.ts
-    │   ├── tiposTramite.ts
-    │   ├── reportes.ts
-    │   └── usuarios.ts
-    ├── components/
-    │   ├── index.ts
-    │   ├── Button.tsx
-    │   ├── Input.tsx
-    │   ├── Select.tsx
-    │   ├── BadgeEstado.tsx
-    │   ├── Loading.tsx
-    │   ├── EmptyState.tsx
-    │   ├── Alert.tsx
-    │   └── Navbar.tsx
-    ├── hooks/
-    │   └── useAuth.ts
-    ├── pages/
-    │   ├── LoginPage.tsx
-    │   ├── RecepcionistaPage.tsx
-    │   ├── AsesorPage.tsx
-    │   ├── CoordinadorPage.tsx
-    │   ├── AdministradorPage.tsx
-    │   ├── CiudadanoPage.tsx
-    │   └── ReportesPage.tsx
-    └── types/
-        └── index.ts      # tipos TypeScript == DTOs del backend
+├── package.json
+└── README.md
 ```
 
 ## Convenciones
-
-- Tipos TypeScript en `src/types/index.ts` reflejan exactamente los DTOs del backend (`Turno`, `Atencion`, `Asesor`, `TipoTramite`, `AuthUser`, `ApiError`).
+- Tipos TypeScript en `src/types/index.ts` reflejan exactamente los DTOs del backend.
 - URL de la API en variable de entorno `VITE_API_URL`.
-- El cliente HTTP (`api/client.ts`) inyecta el token JWT en cada petición y mapea errores de la API a mensajes claros (`ApiClientError` con `status`, `details`).
-- Rutas protegidas mediante `PaginaProtegida` que redirige a `/login` si no hay usuario autenticado.
-- Menú y vistas filtradas por rol (matriz de permisos en `docs/security.md`).
+- Modo controlado por `VITE_USE_MOCK=true` (datos en localStorage) / `false` (backend real).
+- Cliente HTTP (`api/client.ts`) con interceptores para mapear errores de la API a mensajes claros.
+- Rutas protegidas mediante `ProtectedRoute` que verifica rol antes de renderizar.
+- `AuthContext` con sesión persistida, rutas protegidas por rol, redirección tras login.
 
 ## Vistas por rol
 
 | Rol | Ruta | Vista principal |
 |-----|------|-----------------|
-| Recepcionista | `/recepcionista` | Generar turno (seleccionar trámite, prioridad), lista de cola, cancelar turno |
+| Ciudadano | `/ciudadano` | Consulta estado de turno por número |
+| Recepcionista | `/recepcionista` | Generar turno (tipo de trámite, prioridad), lista de cola, cancelar |
 | Asesor | `/asesor` | Llamar siguiente, iniciar/pausar/reanudar/finalizar atención con observaciones y resultado |
-| Coordinador | `/coordinador` | Monitor de cola en tiempo casi real (polling 5s), carga por asesor, reporte tiempo espera |
-| Administrador | `/administrador` | Gestión de usuarios, roles, módulos |
-| Ciudadano | `/ciudadano` | Consulta de estado de turno por número |
+| Coordinador | `/coordinador` | Monitor de cola (polling 5s), carga por asesor, reporte tiempo espera |
+| Administrador | `/administrador` | CRUD de usuarios internos, ventanillas, tipos de trámite |
 | Reportes | `/reportes` | Tiempo promedio de espera con filtros de fecha |
 
 ## Calidad de UI/UX
-
 - Estados de carga (`Loading`), vacío (`EmptyState`) y error (`Alert`).
 - Validación de formularios alineada con Bean Validation del backend.
 - Confirmación en acciones destructivas (cancelar turno).
 - Responsive (Tailwind, móvil/tablet/escritorio).
-- Accesibilidad: foco visible, etiquetas en inputs, HTML semántico, contraste.
+- Accesibilidad: contraste, foco visible, etiquetas, HTML semántico.
 - Microinteracciones: estados de carga en botones, transiciones sutiles.
 
 ## Ejecución
