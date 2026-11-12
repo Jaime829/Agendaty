@@ -11,7 +11,7 @@ import type { LoginRequest } from '@/types';
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login, loading } = useAuth();
-  const [form, setForm] = useState<LoginRequest>({ username: '', password: '' });
+  const [form, setForm] = useState<LoginRequest>({ correo: '', password: '' });
   const [error, setError] = useState<string | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
 
@@ -45,10 +45,11 @@ export default function LoginPage() {
         {error && <Alert tipo="error" mensaje={error} />}
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            label="Usuario"
-            placeholder="Ingrese su usuario"
-            value={form.username}
-            onChange={(e) => setForm({ ...form, username: e.target.value })}
+            label="Correo electrónico"
+            type="email"
+            placeholder="juan@email.com"
+            value={form.correo}
+            onChange={(e) => setForm({ ...form, correo: e.target.value })}
             required
           />
           <Input

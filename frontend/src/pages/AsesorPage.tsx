@@ -29,7 +29,7 @@ export default function AsesorPage() {
   const cargarTurno = async () => {
     setLoading(true);
     try {
-      const data = await turnosService.obtener(Number(user?.asesorId ?? 1));
+      const data = await turnosService.obtener(Number(user?.usuarioId ?? 1));
       setTurno(data);
       if (data.id) {
         try {

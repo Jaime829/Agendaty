@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/context/AuthContext';
 import { LogOut, User, Building2, Clock, Users, LayoutDashboard } from 'lucide-react';
 import { Button } from './Button';
 
@@ -20,7 +20,7 @@ const items: { path: string; label: string; rol: string }[] = [
 ];
 
 export function Navbar() {
-  const { user, logout, tieneAlgunaRol } = useAuth();
+  const { user, logout, tieneAlgunaRol } = useAuthContext();
   const navigate = useNavigate();
 
   if (!user) return null;
