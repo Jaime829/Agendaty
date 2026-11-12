@@ -11,12 +11,20 @@ const iconMap: Record<string, React.ElementType> = {
   CIUDADANO: Clock,
 };
 
+const rolLabels: Record<string, string> = {
+  ROLE_CIUDADANO: 'Ciudadano',
+  ROLE_RECEPCIONISTA: 'Recepcionista',
+  ROLE_ASESOR: 'Asesor',
+  ROLE_COORDINADOR: 'Coordinador',
+  ROLE_ADMINISTRADOR: 'Administrador',
+};
+
 const items: { path: string; label: string; rol: string }[] = [
-  { path: '/recepcionista', label: 'Recepcionista', rol: 'RECEPCIONISTA' },
-  { path: '/asesor', label: 'Asesor', rol: 'ASESOR' },
-  { path: '/coordinador', label: 'Coordinador', rol: 'COORDINADOR' },
-  { path: '/administrador', label: 'Administrador', rol: 'ADMINISTRADOR' },
-  { path: '/ciudadano', label: 'Ciudadano', rol: 'CIUDADANO' },
+  { path: '/recepcionista', label: 'Recepcionista', rol: 'ROLE_RECEPCIONISTA' },
+  { path: '/asesor', label: 'Asesor', rol: 'ROLE_ASESOR' },
+  { path: '/coordinador', label: 'Coordinador', rol: 'ROLE_COORDINADOR' },
+  { path: '/administrador', label: 'Administrador', rol: 'ROLE_ADMINISTRADOR' },
+  { path: '/ciudadano', label: 'Ciudadano', rol: 'ROLE_CIUDADANO' },
 ];
 
 export function Navbar() {
@@ -26,8 +34,10 @@ export function Navbar() {
   if (!user) return null;
 
   const misItems = items.filter(
-    (i) => i.rol === user.rol || tieneAlgunaRol([i.rol, 'ADMINISTRADOR'])
+    (i) => i.rol === user.rol || tieneAlgunaRol([i.rol, 'ROLE_ADMINISTRADOR'])
   );
+
+  const rolLabel = rolLabels[user.rol] || user.rol;
 
   return (
     <nav className="bg-white border-b border-slate-200 sticky top-0 z-20">
@@ -55,7 +65,7 @@ export function Navbar() {
             <span className="text-sm text-slate-600 hidden md:block">
               {user.username}{' '}
               <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded ml-2">
-                {user.rol}
+                {rolLabel}
               </span>
             </span>
             <Button variant="outline" size="sm" onClick={logout}>

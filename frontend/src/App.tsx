@@ -7,7 +7,6 @@ import {
   useLocation,
 } from 'react-router-dom';
 import { AuthProvider, useAuthContext } from '@/context/AuthContext';
-import { ProtectedRoute } from '@/routes';
 import { Navbar } from '@/components/Navbar';
 import { Button } from '@/components/Button';
 import LandingPage from '@/pages/LandingPage';

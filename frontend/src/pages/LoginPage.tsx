@@ -22,6 +22,7 @@ export default function LoginPage() {
     setSubmitLoading(true);
     try {
       const data = await authService.login(form);
+      // En modo JWT-less, el backend no devuelve token. Generamos uno simulado.
       const token = data.token || `demo-token-${data.id}-${Date.now()}`;
       authService.setToken(token);
 
@@ -34,12 +35,9 @@ export default function LoginPage() {
       };
       login(userData);
 
-      // Redirigir al dashboard correspondiente según el rol
+      // Navegar al dashboard correspondiente según el rol
       const rutaDestino = getRouteByRol(data.rol);
-      
-      // Usar solo window.location.href para navegación confiable tras login
-      // (evita problemas de estado de React al cambiar de ruta)
-      window.location.href = rutaDestino;
+      navigate(rutaDestino);
     } catch (err: any) {
       setError(err.message || 'Credenciales inválidas');
     } finally {
