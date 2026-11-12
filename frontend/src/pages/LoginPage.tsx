@@ -22,7 +22,9 @@ export default function LoginPage() {
     setSubmitLoading(true);
     try {
       const data = await authService.login(form);
-      authService.setToken(data.token);
+      // En modo JWT-less, generamos un token simulado para el cliente
+      const token = data.token || `demo-token-${data.id}-${Date.now()}`;
+      authService.setToken(token);
       login(data.token, {
         usuarioId: data.id,
         username: data.correo,
