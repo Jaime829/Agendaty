@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '@/api/auth';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/context/AuthContext';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { Alert } from '@/components/Alert';
@@ -11,7 +11,7 @@ import { getRouteByRol } from '@/utils/roleRoutes';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login, loading } = useAuth();
+  const { login, loading } = useAuthContext();
   const [form, setForm] = useState<LoginRequest>({ correo: '', password: '' });
   const [error, setError] = useState<string | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -24,11 +24,15 @@ export default function LoginPage() {
       const data = await authService.login(form);
       authService.setToken(data.token);
       login(data.token, {
-        usuarioId: data.usuarioId,
-        username: data.username,
+        usuarioId: data.id,
+        username: data.correo,
         rol: data.rol,
       });
-      navigate(getRouteByRol(data.rol));
+      // Navegar al dashboard correspondiente según el rol
+      const rutaDestino = getRouteByRol(data.rol);
+      navigate(rutaDestino);
+      // Fallback: también actualizar window.location por si acaso
+      window.location.href = rutaDestino;
     } catch (err: any) {
       setError(err.message || 'Credenciales inválidas');
     } finally {
