@@ -80,6 +80,12 @@
 			<optional>true</optional>
 		</dependency>
 
+		<!-- Seguridad criptográfica (BCrypt para contraseñas - RA5) -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-crypto</artifactId>
+		</dependency>
+
 		<!-- Pruebas (JUnit + Mockito vienen en el starter-test) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

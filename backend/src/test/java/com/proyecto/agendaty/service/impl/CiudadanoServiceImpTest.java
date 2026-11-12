@@ -40,10 +40,10 @@ class CiudadanoServiceImpTest {
     @Test
     void crearCiudadano_cuandoDocumentoNoExiste_deberiaGuardarYRetornarRespuesta() {
         // ARRANGE (preparar)
-        CiudadanoRequest request = new CiudadanoRequest("Juan Perez", "12345678", "3001234567");
+        CiudadanoRequest request = new CiudadanoRequest("Juan Perez", "juan@email.com", "12345678", "3001234567");
         Ciudadano entidad = new Ciudadano();
         CiudadanoResponse respuestaEsperada =
-                new CiudadanoResponse(1, "Juan Perez", "12345678", "3001234567");
+                new CiudadanoResponse(1, "Juan Perez", "juan@email.com", "12345678", "3001234567");
 
         when(ciudadanoRepository.existsByDocumento("12345678")).thenReturn(false);
         when(ciudadanoMapper.toEntity(request)).thenReturn(entidad);
@@ -62,7 +62,7 @@ class CiudadanoServiceImpTest {
     @Test
     void crearCiudadano_cuandoDocumentoYaExiste_deberiaLanzarBadRequestException() {
         // ARRANGE
-        CiudadanoRequest request = new CiudadanoRequest("Juan Perez", "12345678", "3001234567");
+        CiudadanoRequest request = new CiudadanoRequest("Juan Perez", "juan@email.com", "12345678", "3001234567");
         when(ciudadanoRepository.existsByDocumento("12345678")).thenReturn(true);
 
         // ACT + ASSERT

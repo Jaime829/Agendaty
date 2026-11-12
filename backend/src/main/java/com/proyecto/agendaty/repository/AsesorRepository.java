@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface AsesorRepository extends JpaRepository<Asesor, Integer> {
     boolean existsByVentanillaActual(Ventanilla ventanilla);
     Optional<Asesor> findByUsername(String username);
+    Optional<Asesor> findByCorreo(String correo);
 }

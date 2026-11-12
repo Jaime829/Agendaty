@@ -9,6 +9,11 @@ public record CiudadanoRequest(
         @Size(max = 80, message = "El nombre no puede superar los 80 caracteres")
         String nombre,
 
+        @NotBlank(message = "El correo es obligatorio")
+        @Size(max = 150, message = "El correo no puede superar los 150 caracteres")
+        @jakarta.validation.constraints.Email(message = "El correo no es válido")
+        String correo,
+
         @NotBlank(message = "El documento es obligatorio")
         @Pattern(regexp = "^\\d{5,10}$", message = "El documento debe tener entre 5 y 10 digitos")
         String documento,

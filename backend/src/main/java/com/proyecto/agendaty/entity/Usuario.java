@@ -22,6 +22,9 @@ public abstract class Usuario {
     @Column(name = "nombre", nullable = false, length = 80)
     private String nombre;
 
+    @Column(name = "correo", length = 150, unique = true)
+    private String correo;
+
     @Column(name = "username", length = 80, unique = true)
     private String username;
 

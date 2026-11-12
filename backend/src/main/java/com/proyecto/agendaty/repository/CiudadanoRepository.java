@@ -9,5 +9,7 @@ import java.util.Optional;
 @Repository
 public interface CiudadanoRepository extends JpaRepository<Ciudadano, Integer> {
     Boolean existsByDocumento(String documento);
+    Boolean existsByCorreo(String correo);
     Optional<Ciudadano> findByUsername(String username);
+    Optional<Ciudadano> findByCorreo(String correo);
 }

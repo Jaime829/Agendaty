@@ -11,12 +11,13 @@ public class CiudadanoMapper {
     public Ciudadano toEntity(CiudadanoRequest request) {
         Ciudadano c = new Ciudadano();
         c.setNombre(request.nombre());
+        c.setCorreo(request.correo());
         c.setDocumento(request.documento());
         c.setTelefono(request.telefono());
         return c;
     }
 
     public CiudadanoResponse toResponse(Ciudadano c) {
-        return new CiudadanoResponse(c.getId(), c.getNombre(), c.getDocumento(), c.getTelefono());
+        return new CiudadanoResponse(c.getId(), c.getNombre(), c.getCorreo(), c.getDocumento(), c.getTelefono());
     }
 }
