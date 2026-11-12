@@ -7,6 +7,7 @@ import { Input } from '@/components/Input';
 import { Alert } from '@/components/Alert';
 import { Loading } from '@/components/Loading';
 import { useAuth } from '@/hooks/useAuth';
+import { getRouteByRol } from '@/utils/roleRoutes';
 
 export default function AsesorPage() {
   const { user, tieneRol } = useAuth();
@@ -20,7 +21,7 @@ export default function AsesorPage() {
 
   useEffect(() => {
     if (!tieneRol('ASESOR')) {
-      navigate('/');
+      navigate(getRouteByRol(user?.rol));
       return;
     }
     cargarTurno();

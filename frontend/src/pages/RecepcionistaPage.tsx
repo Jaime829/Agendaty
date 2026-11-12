@@ -9,6 +9,7 @@ import { Alert } from '@/components/Alert';
 import { Loading, EmptyState } from '@/components';
 import { useAuth } from '@/hooks/useAuth';
 import type { TipoTramite } from '@/types';
+import { getRouteByRol } from '@/utils/roleRoutes';
 
 export default function RecepcionistaPage() {
   const { user, tieneRol } = useAuth();
@@ -23,7 +24,7 @@ export default function RecepcionistaPage() {
 
   useEffect(() => {
     if (!tieneRol('RECEPCIONISTA') && !tieneRol('ADMINISTRADOR')) {
-      navigate('/');
+      navigate(getRouteByRol(user?.rol));
       return;
     }
     cargarTipos();

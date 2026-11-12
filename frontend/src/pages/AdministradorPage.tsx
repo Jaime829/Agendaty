@@ -7,6 +7,7 @@ import { Select } from '@/components/Select';
 import { Alert } from '@/components/Alert';
 import { Loading } from '@/components/Loading';
 import { useAuth } from '@/hooks/useAuth';
+import { getRouteByRol } from '@/utils/roleRoutes';
 
 export default function AdministradorPage() {
   const { user, tieneRol } = useAuth();
@@ -14,9 +15,9 @@ export default function AdministradorPage() {
 
   useEffect(() => {
     if (!tieneRol('ADMINISTRADOR')) {
-      navigate('/');
+      navigate(getRouteByRol(user?.rol));
     }
-  }, [tieneRol, navigate]);
+  }, [tieneRol, navigate, user?.rol]);
 
   if (!tieneRol('ADMINISTRADOR')) {
     return null;

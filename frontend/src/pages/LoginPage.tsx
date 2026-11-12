@@ -7,6 +7,7 @@ import { Input } from '@/components/Input';
 import { Alert } from '@/components/Alert';
 import { Building2 } from 'lucide-react';
 import type { LoginRequest } from '@/types';
+import { getRouteByRol } from '@/utils/roleRoutes';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export default function LoginPage() {
         username: data.username,
         rol: data.rol,
       });
-      navigate('/');
+      navigate(getRouteByRol(data.rol));
     } catch (err: any) {
       setError(err.message || 'Credenciales inválidas');
     } finally {

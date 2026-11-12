@@ -5,6 +5,7 @@ import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { Alert } from '@/components/Alert';
 import { useAuth } from '@/hooks/useAuth';
+import { getRouteByRol } from '@/utils/roleRoutes';
 
 export default function ReportesPage() {
   const { tieneRol } = useAuth();
@@ -12,9 +13,9 @@ export default function ReportesPage() {
 
   useEffect(() => {
     if (!tieneRol('COORDINADOR') && !tieneRol('ADMINISTRADOR')) {
-      navigate('/');
+      navigate(getRouteByRol(user?.rol));
     }
-  }, [tieneRol, navigate]);
+  }, [tieneRol, navigate, user?.rol]);
 
   if (!tieneRol('COORDINADOR') && !tieneRol('ADMINISTRADOR')) {
     return null;

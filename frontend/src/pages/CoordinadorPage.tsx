@@ -5,6 +5,7 @@ import { BadgeEstado } from '@/components/BadgeEstado';
 import { Alert } from '@/components/Alert';
 import { Loading } from '@/components/Loading';
 import { useAuth } from '@/hooks/useAuth';
+import { getRouteByRol } from '@/utils/roleRoutes';
 
 export default function CoordinadorPage() {
   const { user, tieneRol } = useAuth();
@@ -16,7 +17,7 @@ export default function CoordinadorPage() {
 
   useEffect(() => {
     if (!tieneRol('COORDINADOR') && !tieneRol('ADMINISTRADOR')) {
-      navigate('/');
+      navigate(getRouteByRol(user?.rol));
       return;
     }
     cargarTodo();
