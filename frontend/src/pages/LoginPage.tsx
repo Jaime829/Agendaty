@@ -22,14 +22,19 @@ export default function LoginPage() {
     setSubmitLoading(true);
     try {
       const data = await authService.login(form);
-      // En modo JWT-less, generamos un token simulado para el cliente
+      // En modo JWT-less, el backend no devuelve token. Generamos uno simulado.
       const token = data.token || `demo-token-${data.id}-${Date.now()}`;
       authService.setToken(token);
-      login(data.token, {
+
+      const userData = {
+        token: token,
+        tipo: 'Bearer',
         usuarioId: data.id,
         username: data.correo,
         rol: data.rol,
-      });
+      };
+      login(userData);
+
       // Navegar al dashboard correspondiente según el rol
       const rutaDestino = getRouteByRol(data.rol);
       navigate(rutaDestino);
