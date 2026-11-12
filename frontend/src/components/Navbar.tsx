@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { LogOut, User, Building2, Clock, Users, LayoutDashboard } from 'lucide-react';
+import { Button } from './Button';
 
 const iconMap: Record<string, React.ElementType> = {
   RECEPCIONISTA: Building2,

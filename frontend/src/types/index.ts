@@ -58,3 +58,16 @@ export interface ApiError {
   errorMessage: string;
   errorsDetails: string;
 }
+
+export interface RegisterRequest {
+  nombre: string;
+  correo: string;
+  password: string;
+  documento: string;
+  telefono: string;
+}
+
+export interface LoginRequest {
+  correo: string;
+  password: string;
+}
