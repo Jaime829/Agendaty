@@ -12,11 +12,13 @@ import com.proyecto.agendaty.exceptions.ResourceNotFoundException;
 import com.proyecto.agendaty.mapper.TurnoMapper;
 import com.proyecto.agendaty.model.enums.EstadoTurno;
 import com.proyecto.agendaty.model.enums.PrioridadTurno;
+import com.proyecto.agendaty.model.enums.RolUsuario;
 import com.proyecto.agendaty.repository.AuditoriaRepository;
 import com.proyecto.agendaty.repository.AsesorRepository;
 import com.proyecto.agendaty.repository.CiudadanoRepository;
 import com.proyecto.agendaty.repository.TipoTramiteRepository;
 import com.proyecto.agendaty.repository.TurnoRepository;
+import com.proyecto.agendaty.service.AuthService;
 import com.proyecto.agendaty.service.TurnoService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
@@ -45,10 +47,12 @@ public class TurnoServiceImp implements TurnoService {
     private final TurnoMapper turnoMapper;
     private final Clock clock;
     private final EntityManager entityManager;
+    private final AuthService authService;
 
     @Override
     @Transactional
     public TurnoResponse generarTurno(TurnoRequest request, Integer usuarioId) {
+        authService.validarRolCualquiera(usuarioId, new RolUsuario[]{RolUsuario.ROLE_RECEPCIONISTA, RolUsuario.ROLE_ADMINISTRADOR});
         Ciudadano ciudadano = ciudadanoRepository.findById(request.ciudadanoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Ciudadano " + request.ciudadanoId() + " no encontrado"));
 
@@ -83,6 +87,7 @@ public class TurnoServiceImp implements TurnoService {
     @Override
     @Transactional
     public TurnoResponse llamarSiguiente(Integer asesorId) {
+        authService.validarRolCualquiera(asesorId, new RolUsuario[]{RolUsuario.ROLE_ASESOR, RolUsuario.ROLE_ADMINISTRADOR});
         Asesor asesor = asesorRepository.findById(asesorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Asesor " + asesorId + " no encontrado"));
 
@@ -136,6 +141,7 @@ public class TurnoServiceImp implements TurnoService {
     @Override
     @Transactional
     public TurnoResponse cancelarTurno(Long turnoId, Integer usuarioId) {
+        authService.validarRolCualquiera(usuarioId, new RolUsuario[]{RolUsuario.ROLE_RECEPCIONISTA, RolUsuario.ROLE_ADMINISTRADOR});
         Turno turno = turnoRepository.findById(turnoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Turno " + turnoId + " no encontrado"));
 

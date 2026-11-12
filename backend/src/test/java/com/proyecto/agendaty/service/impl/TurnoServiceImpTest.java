@@ -17,6 +17,7 @@ import com.proyecto.agendaty.repository.AsesorRepository;
 import com.proyecto.agendaty.repository.CiudadanoRepository;
 import com.proyecto.agendaty.repository.TipoTramiteRepository;
 import com.proyecto.agendaty.repository.TurnoRepository;
+import com.proyecto.agendaty.service.AuthService;
 import com.proyecto.agendaty.service.TurnoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +52,7 @@ class TurnoServiceImpTest {
     @Mock private TurnoMapper turnoMapper;
     @Mock private Clock clock;
     @Mock private EntityManager entityManager;
+    @Mock private AuthService authService;
 
     @InjectMocks
     private TurnoServiceImp service;
@@ -65,6 +67,7 @@ class TurnoServiceImpTest {
         fixedInstant = Instant.parse("2026-11-10T10:00:00Z");
         when(clock.instant()).thenReturn(fixedInstant);
         when(clock.getZone()).thenReturn(ZoneId.of("UTC"));
+        doNothing().when(authService).validarRolCualquiera(any(), any());
 
         ciudadano = new Ciudadano();
         ciudadano.setId(1);
