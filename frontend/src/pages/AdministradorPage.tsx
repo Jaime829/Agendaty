@@ -14,12 +14,12 @@ export default function AdministradorPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!tieneRol('ADMINISTRADOR')) {
+    if (!tieneRol('ROLE_ADMINISTRADOR')) {
       navigate(getRouteByRol(user?.rol));
     }
   }, [tieneRol, navigate, user?.rol]);
 
-  if (!tieneRol('ADMINISTRADOR')) {
+  if (!tieneRol('ROLE_ADMINISTRADOR')) {
     return null;
   }
 
@@ -127,16 +127,16 @@ export default function AdministradorPage() {
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
           <h2 className="text-lg font-bold mb-4">Módulos</h2>
           <div className="space-y-3">
-            <Button variant="secondary" fullWidth onClick={() => navigate('/recepcionista')}>
+            <Button variant="secondary" onClick={() => navigate('/recepcionista')}>
               Recepcionista
             </Button>
-            <Button variant="secondary" fullWidth onClick={() => navigate('/asesor')}>
+            <Button variant="secondary" onClick={() => navigate('/asesor')}>
               Asesor
             </Button>
-            <Button variant="secondary" fullWidth onClick={() => navigate('/coordinador')}>
+            <Button variant="secondary" onClick={() => navigate('/coordinador')}>
               Coordinador
             </Button>
-            <Button variant="secondary" fullWidth onClick={() => navigate('/ciudadano')}>
+            <Button variant="secondary" onClick={() => navigate('/ciudadano')}>
               Ciudadano
             </Button>
           </div>

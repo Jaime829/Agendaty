@@ -1,14 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '@/context/AuthContext';
 import { LogOut, User, Building2, Clock, Users, LayoutDashboard } from 'lucide-react';
-import { Button } from './Button';
+import { Button } from '@/components/Button';
 
 const iconMap: Record<string, React.ElementType> = {
-  RECEPCIONISTA: Building2,
-  ASESOR: User,
-  COORDINADOR: Users,
-  ADMINISTRADOR: LayoutDashboard,
-  CIUDADANO: Clock,
+  ROLE_RECEPCIONISTA: Building2,
+  ROLE_ASESOR: User,
+  ROLE_COORDINADOR: Users,
+  ROLE_ADMINISTRADOR: LayoutDashboard,
+  ROLE_CIUDADANO: Clock,
 };
 
 const rolLabels: Record<string, string> = {
@@ -49,7 +49,7 @@ export function Navbar() {
           </div>
           <div className="hidden md:flex items-center gap-6">
             {misItems.map((i) => {
-              const Icon = iconMap[i.rol];
+              const Icon = iconMap[i.rol] || Building2;
               return (
                 <button
                   key={i.path}

@@ -8,7 +8,6 @@ import {
 } from 'react-router-dom';
 import { AuthProvider, useAuthContext } from '@/context/AuthContext';
 import { Navbar } from '@/components/Navbar';
-import { Button } from '@/components/Button';
 import LandingPage from '@/pages/LandingPage';
 import RegistroPage from '@/pages/RegistroPage';
 import LoginPage from '@/pages/LoginPage';
@@ -18,6 +17,7 @@ import CoordinadorPage from '@/pages/CoordinadorPage';
 import AdministradorPage from '@/pages/AdministradorPage';
 import CiudadanoPage from '@/pages/CiudadanoPage';
 import ReportesPage from '@/pages/ReportesPage';
+import { ProtectedRoute } from '@/routes/ProtectedRoute';
 
 export default function App() {
   const [inicializado, setInicializado] = useState(false);
