@@ -105,15 +105,16 @@ export default function AdministradorPage() {
             />
             <Select
               label="Rol"
+              options={[
+                { value: 'ROLE_CIUDADANO', label: 'Ciudadano' },
+                { value: 'ROLE_ASESOR', label: 'Asesor' },
+                { value: 'ROLE_RECEPCIONISTA', label: 'Recepcionista' },
+                { value: 'ROLE_COORDINADOR', label: 'Coordinador' },
+                { value: 'ROLE_ADMINISTRADOR', label: 'Administrador' },
+              ]}
               value={form.rol}
               onChange={(e) => setForm({ ...form, rol: e.target.value })}
-            >
-              <option value="ROLE_CIUDADANO">Ciudadano</option>
-              <option value="ROLE_ASESOR">Asesor</option>
-              <option value="ROLE_RECEPCIONISTA">Recepcionista</option>
-              <option value="ROLE_COORDINADOR">Coordinador</option>
-              <option value="ROLE_ADMINISTRADOR">Administrador</option>
-            </Select>
+            />
             <Button type="submit" loading={loading}>Crear usuario</Button>
           </form>
 
