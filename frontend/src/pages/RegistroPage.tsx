@@ -19,7 +19,13 @@ export default function RegistroPage() {
     telefono: '',
   });
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitLoading, setSubmitLoading] = useState(false);
+
+  const cerrarError = () => {
+    setError(null);
+    setFieldErrors({});
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +37,7 @@ export default function RegistroPage() {
       navigate('/login');
     } catch (err: any) {
       setError(err.message || 'Error al registrar usuario');
+      setFieldErrors(err.fieldErrors || {});
     } finally {
       setSubmitLoading(false);
     }
@@ -56,7 +63,9 @@ export default function RegistroPage() {
           <p className="text-sm text-slate-500 mb-6">
             Regístrate como ciudadano. Tu rol será siempre CIUDADANO.
           </p>
-          {error && <Alert tipo="error" mensaje={error} />}
+          {error ? (
+            <Alert tipo="error" mensaje={error} fieldErrors={fieldErrors} onCerrar={cerrarError} />
+          ) : null}
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
               label="Nombre completo"

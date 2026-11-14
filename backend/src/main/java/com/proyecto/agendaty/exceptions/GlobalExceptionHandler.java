@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -26,9 +27,11 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
-        String errorDetails = "Errores de validacion en los siguientes campos: " + String.join(", ", errors.keySet());
+        String errorDetails = errors.entrySet().stream()
+                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .collect(Collectors.joining(" | "));
 
-        ErrorResponse response = new ErrorResponse(LocalDateTime.now().toString(),HttpStatus.BAD_REQUEST.value(),"Error en las validaciones", errorDetails);
+        ErrorResponse response = new ErrorResponse(LocalDateTime.now().toString(),HttpStatus.BAD_REQUEST.value(),"Error de validación: " + errorDetails, errorDetails);
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }

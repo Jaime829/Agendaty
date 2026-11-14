@@ -20,14 +20,20 @@ export default function RecepcionistaPage() {
   const [prioritario, setPrioritario] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+
+  const cerrarError = () => {
+    setError(null);
+    setFieldErrors({});
+  };
 
   useEffect(() => {
     if (!user) {
       navigate('/login');
       return;
     }
-    if (!tieneRol('RECEPCIONISTA') && !tieneRol('ADMINISTRADOR')) {
+    if (!tieneRol('ROLE_RECEPCIONISTA') && !tieneRol('ROLE_ADMINISTRADOR')) {
       navigate(getRouteByRol(user.rol));
       return;
     }
@@ -76,6 +82,7 @@ export default function RecepcionistaPage() {
       cargarTurnos();
     } catch (e: any) {
       setError(e.message || 'Error generando turno');
+      setFieldErrors(e.fieldErrors || {});
     } finally {
       setLoading(false);
     }
@@ -97,7 +104,9 @@ export default function RecepcionistaPage() {
         <h1 className="text-2xl font-bold text-slate-900">Recepcionista</h1>
         <div className="flex items-center gap-3">
           {success && <Alert tipo="success" mensaje={success} onCerrar={() => setSuccess(null)} />}
-          {error && <Alert tipo="error" mensaje={error} onCerrar={() => setError(null)} />}
+          {error ? (
+            <Alert tipo="error" mensaje={error} fieldErrors={fieldErrors} onCerrar={cerrarError} />
+          ) : null}
         </div>
       </div>
 

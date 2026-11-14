@@ -14,11 +14,18 @@ export default function LoginPage() {
   const { login, loading } = useAuthContext();
   const [form, setForm] = useState<LoginRequest>({ correo: '', password: '' });
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitLoading, setSubmitLoading] = useState(false);
+
+  const cerrarError = () => {
+    setError(null);
+    setFieldErrors({});
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setFieldErrors({});
     setSubmitLoading(true);
     try {
       const data = await authService.login(form);
@@ -39,6 +46,7 @@ export default function LoginPage() {
       window.location.href = rutaDestino;
     } catch (err: any) {
       setError(err.message || 'Credenciales inválidas');
+      setFieldErrors(err.fieldErrors || {});
     } finally {
       setSubmitLoading(false);
     }
@@ -51,7 +59,9 @@ export default function LoginPage() {
           <Building2 className="h-6 w-6 text-blue-600" />
           <h1 className="text-xl font-bold text-slate-900">Iniciar sesión</h1>
         </div>
-        {error && <Alert tipo="error" mensaje={error} />}
+        {error ? (
+          <Alert tipo="error" mensaje={error} fieldErrors={fieldErrors} onCerrar={cerrarError} />
+        ) : null}
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
             label="Correo electrónico"

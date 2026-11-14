@@ -27,10 +27,12 @@ api.interceptors.request.use(
 export class ApiClientError extends Error {
   status: number;
   details: string;
-  constructor(message: string, status: number, details: string) {
+  fieldErrors: Record<string, string>;
+  constructor(message: string, status: number, details: string, fieldErrors?: Record<string, string>) {
     super(message);
     this.status = status;
     this.details = details;
+    this.fieldErrors = fieldErrors ?? {};
   }
 }
 
@@ -42,7 +44,20 @@ api.interceptors.response.use(
       const body = data as any;
       const message = body?.errorMessage || body?.message || `Error ${status}`;
       const details = body?.errorsDetails || '';
-      throw new ApiClientError(message, status as number, details);
+      
+      // Parsear errores de campo cuando viene en formato "campo: mensaje | campo: mensaje"
+      let fieldErrors: Record<string, string> = {};
+      if (details && details.includes(':')) {
+        fieldErrors = details.split('|').reduce((acc: Record<string, string>, item: string) => {
+          const [field, ...msgParts] = item.trim().split(':');
+          if (field && msgParts.length > 0) {
+            acc[field.trim()] = msgParts.join(':').trim();
+          }
+          return acc;
+        }, {});
+      }
+
+      throw new ApiClientError(message, status as number, details, fieldErrors);
     }
     throw err;
   }

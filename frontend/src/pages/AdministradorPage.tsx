@@ -30,8 +30,14 @@ export default function AdministradorPage() {
 
   const [usuarios, setUsuarios] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ nombre: '', username: '', password: '', email: '', rol: 'ROLE_CIUDADANO' });
+
+  const cerrarError = () => {
+    setError(null);
+    setFieldErrors({});
+  };
 
   useEffect(() => {
     cargarUsuarios();
@@ -39,6 +45,7 @@ export default function AdministradorPage() {
 
   const cargarUsuarios = async () => {
     setLoading(true);
+    setFieldErrors({});
     try {
       const data = await usuariosService.listar();
       setUsuarios(data);
@@ -70,6 +77,7 @@ export default function AdministradorPage() {
       cargarUsuarios();
     } catch (e: any) {
       setError(e.message || 'Error creando usuario');
+      setFieldErrors(e.fieldErrors || {});
     } finally {
       setLoading(false);
     }
@@ -78,7 +86,9 @@ export default function AdministradorPage() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold text-slate-900 mb-6">Administrador</h1>
-      {error && <Alert tipo="error" mensaje={error} onCerrar={() => setError(null)} />}
+      {error ? (
+        <Alert tipo="error" mensaje={error} fieldErrors={fieldErrors} onCerrar={cerrarError} />
+      ) : null}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
