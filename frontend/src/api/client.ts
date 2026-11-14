@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios';
+import { authService } from './auth';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
@@ -6,6 +7,21 @@ export const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
 });
+
+api.interceptors.request.use(
+  (config) => {
+    const token = authService.getToken();
+    const userId = authService.getUser()?.usuarioId;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    if (userId) {
+      config.headers['X-Usuario-Id'] = userId;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Mapea errores de la API a mensajes claros
 export class ApiClientError extends Error {
