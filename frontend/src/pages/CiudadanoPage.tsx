@@ -57,7 +57,7 @@ export default function CiudadanoPage() {
             onChange={(e) => setNumero(e.target.value)}
             required
           />
-          <Button onClick={consultar} loading={loadingState}>
+          <Button onClick={consultar} loading={loading}>
             Consultar
           </Button>
         </div>
