@@ -16,7 +16,7 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     if (userId) {
-      config.headers['X-Usuario-Id'] = userId;
+      config.headers['X_Usuario_Id'] = userId;
     }
     return config;
   },
