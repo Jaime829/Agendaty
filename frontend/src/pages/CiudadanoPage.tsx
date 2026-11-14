@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { turnosService } from '@/api';
 import { BadgeEstado } from '@/components/BadgeEstado';
