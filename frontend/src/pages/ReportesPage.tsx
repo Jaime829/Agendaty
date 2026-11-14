@@ -4,20 +4,25 @@ import { reportesService } from '@/api';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { Alert } from '@/components/Alert';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/context/AuthContext';
 import { getRouteByRol } from '@/utils/roleRoutes';
 
 export default function ReportesPage() {
-  const { tieneRol } = useAuth();
+  const { user, tieneRol } = useAuthContext();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!tieneRol('COORDINADOR') && !tieneRol('ADMINISTRADOR')) {
-      navigate(getRouteByRol(user?.rol));
+    if (!user) {
+      navigate('/login');
+      return;
     }
-  }, [tieneRol, navigate, user?.rol]);
+    if (!tieneRol('ROLE_COORDINADOR') && !tieneRol('ROLE_ADMINISTRADOR')) {
+      navigate(getRouteByRol(user.rol));
+      return;
+    }
+  }, [tieneRol, navigate, user]);
 
-  if (!tieneRol('COORDINADOR') && !tieneRol('ADMINISTRADOR')) {
+  if (!tieneRol('ROLE_COORDINADOR') && !tieneRol('ROLE_ADMINISTRADOR')) {
     return null;
   }
 

@@ -21,7 +21,7 @@ export default function CoordinadorPage() {
       navigate('/login');
       return;
     }
-    if (!tieneRol('COORDINADOR') && !tieneRol('ROLE_ADMINISTRADOR')) {
+    if (!tieneRol('ROLE_COORDINADOR') && !tieneRol('ROLE_ADMINISTRADOR')) {
       navigate(getRouteByRol(user.rol));
       return;
     }
