@@ -94,11 +94,11 @@ class AtencionServiceImpTest {
 
         when(turnoRepository.findById(1L)).thenReturn(Optional.of(turnoLlamado));
         when(asesorRepository.findById(7)).thenReturn(Optional.of(asesor));
-        // RN4: asesor ya tiene un turno en EN_ATENCION
+        //asesor ya tiene un turno en EN_ATENCION
         when(turnoRepository.existsByEstadoAndAsesor(EstadoTurno.EN_ATENCION, asesor)).thenReturn(true);
 
         assertThrows(BadRequestException.class, () -> service.iniciarAtencion(1L, 7),
-                "RN4: un asesor no puede tener dos turnos activos");
+                "Un asesor no puede tener dos turnos activos");
     }
 
     @Test

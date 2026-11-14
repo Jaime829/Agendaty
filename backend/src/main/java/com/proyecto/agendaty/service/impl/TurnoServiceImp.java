@@ -95,14 +95,14 @@ public class TurnoServiceImp implements TurnoService {
             throw new BadRequestException("El asesor " + asesor.getNombre() + " no está disponible");
         }
 
-        // RN4: el asesor no puede tener un turno activo (EN_ATENCION o EN_PAUSA)
+        //  el asesor no puede tener un turno activo (EN_ATENCION o EN_PAUSA)
         boolean tieneActivo = turnoRepository.existsByEstadoAndAsesor(EstadoTurno.EN_ATENCION, asesor)
                 || turnoRepository.existsByEstadoAndAsesor(EstadoTurno.EN_PAUSA, asesor);
         if (tieneActivo) {
             throw new BadRequestException("El asesor " + asesor.getNombre() + " ya tiene un turno en atención");
         }
 
-        // RN3: prioritarios primero, luego orden de llegada (fechaCreacion ASC)
+        //prioritarios primero, luego orden de llegada (fechaCreacion ASC)
         List<Turno> prioritarios = turnoRepository.findByEstadoAndPrioridadOrderByCreacion(EstadoTurno.EN_ESPERA, PrioridadTurno.PRIORITARIO);
         List<Turno> normales = turnoRepository.findByEstadoAndPrioridadOrderByCreacion(EstadoTurno.EN_ESPERA, PrioridadTurno.NORMAL);
 
@@ -168,7 +168,7 @@ public class TurnoServiceImp implements TurnoService {
             throw new BadRequestException("Solo se puede marcar como no atendido un turno en estado LLAMADO");
         }
 
-        // RN2: turno llamado sin respuesta pasa a NO_ATENDIDO
+        //turno llamado sin respuesta pasa a NO_ATENDIDO
         turno.setEstado(EstadoTurno.NO_ATENDIDO);
         Turno noAtendido = turnoRepository.save(turno);
 

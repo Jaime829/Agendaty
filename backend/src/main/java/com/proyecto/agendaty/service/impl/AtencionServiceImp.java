@@ -50,18 +50,20 @@ public class AtencionServiceImp implements AtencionService {
         entityManager.lock(turno, LockModeType.PESSIMISTIC_WRITE);
 
         if (turno.getEstado() != EstadoTurno.LLAMADO && turno.getEstado() != EstadoTurno.EN_ESPERA) {
-            throw new BadRequestException("El turno " + turno.getNumeroTurno() + " no se puede atender (estado: " + turno.getEstado() + ")");
+            throw new BadRequestException(
+                    "El turno " + turno.getNumeroTurno() + " no se puede atender (estado: " + turno.getEstado() + ")");
         }
 
-        // RN1: un turno no puede ser atendido por dos asesores al mismo tiempo
+        // Un turno no puede ser atendido por dos asesores al mismo tiempo
         if (turno.getAsesor() != null && !turno.getAsesor().getId().equals(asesorId)) {
-            throw new BadRequestException("El turno " + turno.getNumeroTurno() + " ya está siendo atendido por el asesor " + turno.getAsesor().getNombre());
+            throw new BadRequestException("El turno " + turno.getNumeroTurno()
+                    + " ya está siendo atendido por el asesor " + turno.getAsesor().getNombre());
         }
 
         Asesor asesor = asesorRepository.findById(asesorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Asesor " + asesorId + " no encontrado"));
 
-        // RN4: un asesor solo puede tener un turno activo
+        // un asesor solo puede tener un turno activo
         boolean asesorTieneActivo = turnoRepository.existsByEstadoAndAsesor(EstadoTurno.EN_ATENCION, asesor)
                 || turnoRepository.existsByEstadoAndAsesor(EstadoTurno.EN_PAUSA, asesor);
         if (asesorTieneActivo) {
@@ -163,7 +165,7 @@ public class AtencionServiceImp implements AtencionService {
     @Override
     @Transactional
     public AtencionResponse finalizarAtencion(Long turnoId, Integer asesorId, AtencionRequest request) {
-        // RN5: toda atención finalizada debe tener resultado registrado
+        // Toda atención finalizada debe tener resultado registrado
         if (request == null || request.resultado() == null || request.resultado().isBlank()) {
             throw new BadRequestException("El resultado es obligatorio para finalizar la atención");
         }
@@ -177,7 +179,8 @@ public class AtencionServiceImp implements AtencionService {
 
         Turno turno = atencion.getTurno();
         if (turno.getEstado() != EstadoTurno.EN_ATENCION && turno.getEstado() != EstadoTurno.EN_PAUSA) {
-            throw new BadRequestException("El turno " + turno.getNumeroTurno() + " no se puede finalizar (estado: " + turno.getEstado() + ")");
+            throw new BadRequestException("El turno " + turno.getNumeroTurno() + " no se puede finalizar (estado: "
+                    + turno.getEstado() + ")");
         }
 
         LocalDateTime ahora = LocalDateTime.now(clock);
@@ -185,7 +188,7 @@ public class AtencionServiceImp implements AtencionService {
         atencion.setResultado(request.resultado());
         atencion.setObservaciones(request.observaciones());
 
-        // RN6: calcular tiempos
+        // Calcular tiempos
         LocalDateTime inicio = atencion.getFechaInicio();
         Long esperaMinutos = null;
         if (turno.getFechaCreacion() != null && turno.getFechaLlamado() != null) {

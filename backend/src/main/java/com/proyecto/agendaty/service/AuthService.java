@@ -16,6 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -138,6 +141,26 @@ public class AuthService {
                 guardado.getCorreo(),
                 guardado.getRol().name()
         );
+    }
+
+    /**
+     * RA4: Listar todos los usuarios (solo ADMINISTRADOR).
+     */
+    public List<LoginResponse> listarTodosLosUsuarios() {
+        List<Ciudadano> ciudadanos = ciudadanoRepository.findAll();
+        List<Asesor> asesores = asesorRepository.findAll();
+
+        List<LoginResponse> todos = new ArrayList<>();
+
+        for (Ciudadano c : ciudadanos) {
+            todos.add(new LoginResponse(c.getId(), c.getNombre(), c.getCorreo(), c.getRol().name()));
+        }
+
+        for (Asesor a : asesores) {
+            todos.add(new LoginResponse(a.getId(), a.getNombre(), a.getCorreo(), a.getRol().name()));
+        }
+
+        return todos;
     }
 
     /**

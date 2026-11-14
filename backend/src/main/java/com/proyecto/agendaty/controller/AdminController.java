@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/admin/usuarios")
 @CrossOrigin(origins = "http://localhost:5173")
@@ -33,5 +35,18 @@ public class AdminController {
 
         LoginResponse creado = authService.crearUsuarioInterno(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+    }
+
+    /**
+     * RA4: Listar todos los usuarios (solo ADMINISTRADOR).
+     */
+    @GetMapping
+    public ResponseEntity<List<LoginResponse>> listarUsuarios(
+            @RequestHeader Integer X_Usuario_Id) {
+
+        authService.validarRol(X_Usuario_Id, com.proyecto.agendaty.model.enums.RolUsuario.ROLE_ADMINISTRADOR);
+
+        List<LoginResponse> usuarios = authService.listarTodosLosUsuarios();
+        return ResponseEntity.ok(usuarios);
     }
 }
