@@ -7,12 +7,12 @@ import { Input } from '@/components/Input';
 import { Select } from '@/components/Select';
 import { Alert } from '@/components/Alert';
 import { Loading, EmptyState } from '@/components';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/context/AuthContext';
 import type { TipoTramite } from '@/types';
 import { getRouteByRol } from '@/utils/roleRoutes';
 
 export default function RecepcionistaPage() {
-  const { user, tieneRol } = useAuth();
+  const { user, tieneRol } = useAuthContext();
   const navigate = useNavigate();
   const [tipos, setTipos] = useState<TipoTramite[]>([]);
   const [turnos, setTurnos] = useState<any[]>([]);
@@ -23,13 +23,17 @@ export default function RecepcionistaPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
     if (!tieneRol('RECEPCIONISTA') && !tieneRol('ADMINISTRADOR')) {
-      navigate(getRouteByRol(user?.rol));
+      navigate(getRouteByRol(user.rol));
       return;
     }
     cargarTipos();
     cargarTurnos();
-  }, [tieneRol, navigate]);
+  }, [tieneRol, navigate, user]);
 
   const cargarTipos = async () => {
     try {
@@ -80,7 +84,7 @@ export default function RecepcionistaPage() {
   const cancelar = async (id: number) => {
     if (!window.confirm('¿Confirma cancelar este turno?')) return;
     try {
-      await turnosService.cancelar(id, user?.usuarioId ?? 0);
+      await turnosService.cancelar(id, Number(user?.usuarioId ?? 0));
       cargarTurnos();
     } catch (e: any) {
       setError(e.message || 'Error cancelando turno');

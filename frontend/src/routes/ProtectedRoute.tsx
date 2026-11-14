@@ -10,7 +10,6 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
   const { user, loading, isAuthenticated, tieneAlgunaRol } = useAuthContext();
   const location = useLocation();
-  console.log([user, loading, isAuthenticated]);
 
   if (loading) return null;
 

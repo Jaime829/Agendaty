@@ -6,31 +6,36 @@ import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { Alert } from '@/components/Alert';
 import { Loading } from '@/components/Loading';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/context/AuthContext';
 import { getRouteByRol } from '@/utils/roleRoutes';
 
 export default function AsesorPage() {
-  const { user, tieneRol } = useAuth();
+  const { user, tieneRol, loading } = useAuthContext();
   const navigate = useNavigate();
   const [turno, setTurno] = useState<any>(null);
   const [atencion, setAtencion] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingState, setLoading] = useState(false);
   const [resultado, setResultado] = useState('');
   const [observaciones, setObservaciones] = useState('');
 
   useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      navigate('/login');
+      return;
+    }
     if (!tieneRol('ASESOR')) {
-      navigate(getRouteByRol(user?.rol));
+      navigate(getRouteByRol(user.rol));
       return;
     }
     cargarTurno();
-  }, [tieneRol, navigate]);
+  }, [tieneRol, navigate, user, loading]);
 
   const cargarTurno = async () => {
     setLoading(true);
     try {
-      const data = await turnosService.obtener(Number(user?.usuarioId ?? 1));
+      const data = await turnosService.obtener(Number(user.usuarioId ?? 1));
       setTurno(data);
       if (data.id) {
         try {
@@ -51,7 +56,7 @@ export default function AsesorPage() {
     setError(null);
     setLoading(true);
     try {
-      const data = await turnosService.llamarSiguiente(user?.usuarioId ?? 0);
+      const data = await turnosService.llamarSiguiente(Number(user.usuarioId ?? 0));
       setTurno(data);
       setAtencion(null);
     } catch (e: any) {
@@ -67,7 +72,7 @@ export default function AsesorPage() {
     try {
       const data = await atencionesService.iniciar({
         turnoId: turno.id,
-        asesorId: user?.usuarioId ?? 0,
+        asesorId: Number(user.usuarioId ?? 0),
       });
       setAtencion(data);
       setTurno((t) => (t ? { ...t, estado: 'EN_ATENCION' } : t));
@@ -80,7 +85,7 @@ export default function AsesorPage() {
 
   const pausar = async () => {
     try {
-      const data = await atencionesService.pausar(turno.id, user?.usuarioId ?? 0);
+      const data = await atencionesService.pausar(turno.id, Number(user.usuarioId ?? 0));
       setAtencion(data);
       setTurno((t) => (t ? { ...t, estado: 'EN_PAUSA' } : t));
     } catch (e: any) {
@@ -90,7 +95,7 @@ export default function AsesorPage() {
 
   const reanudar = async () => {
     try {
-      const data = await atencionesService.reanudar(turno.id, user?.usuarioId ?? 0);
+      const data = await atencionesService.reanudar(turno.id, Number(user.usuarioId ?? 0));
       setAtencion(data);
       setTurno((t) => (t ? { ...t, estado: 'EN_ATENCION' } : t));
     } catch (e: any) {
@@ -108,7 +113,7 @@ export default function AsesorPage() {
     try {
       const data = await atencionesService.finalizar({
         turnoId: turno.id,
-        asesorId: user?.usuarioId ?? 0,
+        asesorId: Number(user.usuarioId ?? 0),
         resultado,
         observaciones,
       });
@@ -130,7 +135,7 @@ export default function AsesorPage() {
 
       {!turno ? (
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <Button onClick={llamarSiguiente} loading={loading}>
+          <Button onClick={llamarSiguiente} loading={loadingState}>
             Llamar siguiente turno (CA5)
           </Button>
         </div>
@@ -155,7 +160,7 @@ export default function AsesorPage() {
             {turno.estado === 'LLAMADO' && (
               <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
                 <p className="text-sm text-blue-800">El turno está listo para ser atendido.</p>
-                <Button onClick={iniciarAtencion} loading={loading}>
+                <Button onClick={iniciarAtencion} loading={loadingState}>
                   Iniciar atención (RN1, RN4)
                 </Button>
               </div>
@@ -191,7 +196,7 @@ export default function AsesorPage() {
                     value={observaciones}
                     onChange={(e) => setObservaciones(e.target.value)}
                   />
-                  <Button onClick={finalizar} loading={loading} className="mt-2">
+                  <Button onClick={finalizar} loading={loadingState} className="mt-2">
                     Finalizar atención
                   </Button>
                 </div>

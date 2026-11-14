@@ -1,22 +1,37 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { turnosService } from '@/api';
 import { BadgeEstado } from '@/components/BadgeEstado';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { Alert } from '@/components/Alert';
 import { EmptyState } from '@/components';
+import { useAuthContext } from '@/context/AuthContext';
+import { getRouteByRol } from '@/utils/roleRoutes';
 
 export default function CiudadanoPage() {
+  const { user } = useAuthContext();
+  const navigate = useNavigate();
   const [numero, setNumero] = useState('');
   const [turno, setTurno] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    if (user.rol !== 'ROLE_CIUDADANO' && user.rol !== 'ROLE_ADMINISTRADOR') {
+      navigate(getRouteByRol(user.rol));
+      return;
+    }
+  }, [user, navigate]);
+
   const consultar = async () => {
     setError(null);
     setLoading(true);
     try {
-      // Endpoint público simplificado: listar y filtrar por número (en producción habría un endpoint dedicado)
       const turnos = await turnosService.listar();
       const t = turnos.find((x: any) => x.numeroTurno === numero.trim().toUpperCase());
       if (t) setTurno(t);
@@ -40,8 +55,11 @@ export default function CiudadanoPage() {
             placeholder="CEDN-00001"
             value={numero}
             onChange={(e) => setNumero(e.target.value)}
+            required
           />
-          <Button onClick={consultar} loading={loading}>Consultar</Button>
+          <Button onClick={consultar} loading={loadingState}>
+            Consultar
+          </Button>
         </div>
         {error && <Alert tipo="error" mensaje={error} onCerrar={() => setError(null)} />}
       </div>

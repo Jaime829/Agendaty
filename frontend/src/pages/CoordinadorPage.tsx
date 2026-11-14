@@ -4,26 +4,31 @@ import { turnosService, reportesService, asesoresService } from '@/api';
 import { BadgeEstado } from '@/components/BadgeEstado';
 import { Alert } from '@/components/Alert';
 import { Loading } from '@/components/Loading';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/context/AuthContext';
 import { getRouteByRol } from '@/utils/roleRoutes';
 
 export default function CoordinadorPage() {
-  const { user, tieneRol } = useAuth();
+  const { user, tieneRol, loading } = useAuthContext();
   const navigate = useNavigate();
   const [turnos, setTurnos] = useState<any[]>([]);
   const [reporte, setReporte] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingState, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!tieneRol('COORDINADOR') && !tieneRol('ADMINISTRADOR')) {
-      navigate(getRouteByRol(user?.rol));
+    if (loading) return;
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    if (!tieneRol('COORDINADOR') && !tieneRol('ROLE_ADMINISTRADOR')) {
+      navigate(getRouteByRol(user.rol));
       return;
     }
     cargarTodo();
     const intervalo = setInterval(cargarTodo, 5000);
     return () => clearInterval(intervalo);
-  }, [tieneRol, navigate]);
+  }, [tieneRol, navigate, user, loading]);
 
   const cargarTodo = async () => {
     try {
@@ -54,15 +59,13 @@ export default function CoordinadorPage() {
         </div>
         <div className="bg-white p-4 rounded-xl border border-slate-200">
           <p className="text-xs text-slate-500">Tiempo espera promedio</p>
-          <p className="text-2xl font-bold">
-            {reporte?.valor != null ? reporte.valor : '—'} min
-          </p>
+          <p className="text-2xl font-bold">{reporte?.valor != null ? reporte.valor : '—'} min</p>
         </div>
       </div>
 
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
         <h2 className="text-lg font-bold mb-4">Monitor de cola (tiempo casi real)</h2>
-        {loading ? (
+        {loadingState ? (
           <Loading />
         ) : turnos.length === 0 ? (
           <p className="text-slate-500">Sin turnos.</p>

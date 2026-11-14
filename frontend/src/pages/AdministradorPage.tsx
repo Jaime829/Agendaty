@@ -6,16 +6,21 @@ import { Input } from '@/components/Input';
 import { Select } from '@/components/Select';
 import { Alert } from '@/components/Alert';
 import { Loading } from '@/components/Loading';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/context/AuthContext';
 import { getRouteByRol } from '@/utils/roleRoutes';
 
 export default function AdministradorPage() {
-  const { user, tieneRol } = useAuth();
+  const { user, tieneRol } = useAuthContext();
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
     if (!tieneRol('ROLE_ADMINISTRADOR')) {
-      navigate(getRouteByRol(user?.rol));
+      navigate(getRouteByRol(user.rol));
+      return;
     }
   }, [tieneRol, navigate, user?.rol]);
 
@@ -39,6 +44,17 @@ export default function AdministradorPage() {
       setUsuarios(data);
     } catch (e: any) {
       setError(e.message || 'Error cargando usuarios');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const cargarAsesores = async () => {
+    try {
+      const data = await asesoresService.listar();
+      setUsuarios(data);
+    } catch (e: any) {
+      setError(e.message || 'Error cargando asesores');
     } finally {
       setLoading(false);
     }
@@ -89,16 +105,15 @@ export default function AdministradorPage() {
             />
             <Select
               label="Rol"
-              options={[
-                { value: 'ROLE_CIUDADANO', label: 'Ciudadano' },
-                { value: 'ROLE_ASESOR', label: 'Asesor' },
-                { value: 'ROLE_RECEPCIONISTA', label: 'Recepcionista' },
-                { value: 'ROLE_COORDINADOR', label: 'Coordinador' },
-                { value: 'ROLE_ADMINISTRADOR', label: 'Administrador' },
-              ]}
               value={form.rol}
               onChange={(e) => setForm({ ...form, rol: e.target.value })}
-            />
+            >
+              <option value="ROLE_CIUDADANO">Ciudadano</option>
+              <option value="ROLE_ASESOR">Asesor</option>
+              <option value="ROLE_RECEPCIONISTA">Recepcionista</option>
+              <option value="ROLE_COORDINADOR">Coordinador</option>
+              <option value="ROLE_ADMINISTRADOR">Administrador</option>
+            </Select>
             <Button type="submit" loading={loading}>Crear usuario</Button>
           </form>
 
@@ -127,16 +142,16 @@ export default function AdministradorPage() {
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
           <h2 className="text-lg font-bold mb-4">Módulos</h2>
           <div className="space-y-3">
-            <Button variant="secondary" onClick={() => navigate('/recepcionista')}>
+            <Button variant="secondary" fullWidth onClick={() => navigate('/recepcionista')}>
               Recepcionista
             </Button>
-            <Button variant="secondary" onClick={() => navigate('/asesor')}>
+            <Button variant="secondary" fullWidth onClick={() => navigate('/asesor')}>
               Asesor
             </Button>
-            <Button variant="secondary" onClick={() => navigate('/coordinador')}>
+            <Button variant="secondary" fullWidth onClick={() => navigate('/coordinador')}>
               Coordinador
             </Button>
-            <Button variant="secondary" onClick={() => navigate('/ciudadano')}>
+            <Button variant="secondary" fullWidth onClick={() => navigate('/ciudadano')}>
               Ciudadano
             </Button>
           </div>
