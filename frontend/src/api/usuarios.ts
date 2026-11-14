@@ -12,14 +12,14 @@ export interface AsignarRolParams {
 }
 
 export const usuariosService = {
-  listar: (): Promise<UsuarioDto[]> => api.get('/usuarios').then((r) => r.data),
+  listar: (): Promise<UsuarioDto[]> => api.get('/admin/usuarios').then((r) => r.data),
   crear: (data: {
     nombre: string;
     username: string;
     password: string;
     email?: string;
     rol: string;
-  }): Promise<UsuarioDto> => api.post('/usuarios', data).then((r) => r.data),
+  }): Promise<UsuarioDto> => api.post('/admin/usuarios', data).then((r) => r.data),
   asignarRol: (id: number, params: AsignarRolParams): Promise<UsuarioDto> =>
-    api.put(`/usuarios/${id}/rol`, params).then((r) => r.data),
+    api.put(`/admin/usuarios/${id}/rol`, params).then((r) => r.data),
 };
