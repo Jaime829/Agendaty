@@ -25,7 +25,7 @@ export default function AsesorPage() {
       navigate('/login');
       return;
     }
-    if (!tieneRol('ASESOR')) {
+    if (!tieneRol('ROLE_ASESOR') && !tieneRol('ROLE_ADMINISTRADOR')) {
       navigate(getRouteByRol(user.rol));
       return;
     }
