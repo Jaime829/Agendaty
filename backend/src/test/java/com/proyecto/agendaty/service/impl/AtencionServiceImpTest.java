@@ -238,6 +238,199 @@ class AtencionServiceImpTest {
         assertThrows(BadRequestException.class, () -> service.pausarAtencion(1L, 99));
     }
 
+    @Test
+    void pausarAtencion_casoFeliz_creaPausaYActualizaEstado() {
+        turno.setEstado(EstadoTurno.EN_ATENCION);
+
+        Atencion atencion = new Atencion();
+        atencion.setId(1L);
+        atencion.setTurno(turno);
+        atencion.setAsesor(asesor);
+        atencion.setPausas(new java.util.ArrayList<>());
+        atencion.setFechaInicio(java.time.LocalDateTime.of(2026, 11, 10, 10, 0));
+
+        when(atencionRepository.findByTurnoId(1L)).thenReturn(Optional.of(atencion));
+        when(pausaRepository.save(any(Pausa.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(turnoRepository.save(any(Turno.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(atencionMapper.toResponse(any(Atencion.class))).thenAnswer(inv -> {
+            Atencion a = inv.getArgument(0);
+            return new AtencionResponse(a.getId(), a.getTurno().getId(), a.getTurno().getNumeroTurno(),
+                    a.getAsesor().getId(), a.getAsesor().getNombre(), a.getFechaInicio(), a.getFechaFin(),
+                    null, null, null, null, null);
+        });
+        when(atencionRepository.findById(1L)).thenReturn(Optional.of(atencion));
+
+        service.pausarAtencion(1L, 7);
+
+        assertEquals(EstadoTurno.EN_PAUSA, turno.getEstado());
+        verify(pausaRepository).save(any(Pausa.class));
+    }
+
+    @Test
+    void pausarAtencion_estadoNoEnAtencion_lanzaExcepcion() {
+        turno.setEstado(EstadoTurno.FINALIZADO);
+
+        Atencion atencion = new Atencion();
+        atencion.setId(1L);
+        atencion.setTurno(turno);
+        atencion.setAsesor(asesor);
+
+        when(atencionRepository.findByTurnoId(1L)).thenReturn(Optional.of(atencion));
+
+        assertThrows(BadRequestException.class, () -> service.pausarAtencion(1L, 7));
+    }
+
+    @Test
+    void reanudarAtencion_sinPausaActiva_lanzaExcepcion() {
+        turno.setEstado(EstadoTurno.EN_PAUSA);
+
+        Atencion atencion = new Atencion();
+        atencion.setId(1L);
+        atencion.setTurno(turno);
+        atencion.setAsesor(asesor);
+        atencion.setPausas(new java.util.ArrayList<>());
+
+        when(atencionRepository.findByTurnoId(1L)).thenReturn(Optional.of(atencion));
+
+        assertThrows(BadRequestException.class, () -> service.reanudarAtencion(1L, 7));
+    }
+
+    @Test
+    void reanudarAtencion_estadoNoEnPausa_lanzaExcepcion() {
+        turno.setEstado(EstadoTurno.EN_ATENCION);
+
+        Atencion atencion = new Atencion();
+        atencion.setId(1L);
+        atencion.setTurno(turno);
+        atencion.setAsesor(asesor);
+        atencion.setPausas(new java.util.ArrayList<>());
+
+        when(atencionRepository.findByTurnoId(1L)).thenReturn(Optional.of(atencion));
+
+        assertThrows(BadRequestException.class, () -> service.reanudarAtencion(1L, 7));
+    }
+
+    @Test
+    void reanudarAtencion_casoFeliz_cierraPausaYCalculaDuracion() {
+        turno.setEstado(EstadoTurno.EN_PAUSA);
+
+        Pausa pausa = new Pausa();
+        pausa.setId(9L);
+        pausa.setFechaInicio(java.time.LocalDateTime.of(2026, 11, 10, 10, 10));
+
+        Atencion atencion = new Atencion();
+        atencion.setId(1L);
+        atencion.setTurno(turno);
+        atencion.setAsesor(asesor);
+        atencion.setPausas(new java.util.ArrayList<>(List.of(pausa)));
+        pausa.setAtencion(atencion);
+
+        when(atencionRepository.findByTurnoId(1L)).thenReturn(Optional.of(atencion));
+        when(pausaRepository.save(any(Pausa.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(turnoRepository.save(any(Turno.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(atencionMapper.toResponse(any(Atencion.class))).thenAnswer(inv -> {
+            Atencion a = inv.getArgument(0);
+            return new AtencionResponse(a.getId(), a.getTurno().getId(), a.getTurno().getNumeroTurno(),
+                    a.getAsesor().getId(), a.getAsesor().getNombre(), a.getFechaInicio(), a.getFechaFin(),
+                    null, null, null, null, null);
+        });
+        when(atencionRepository.findById(1L)).thenReturn(Optional.of(atencion));
+
+        service.reanudarAtencion(1L, 7);
+
+        assertEquals(EstadoTurno.EN_ATENCION, turno.getEstado());
+        assertNotNull(pausa.getFechaFin());
+        assertNotNull(pausa.getDuracionMinutos());
+    }
+
+    @Test
+    void obtenerAtencionPorTurno_existente_retornaAtencion() {
+        Atencion atencion = new Atencion();
+        atencion.setId(1L);
+        atencion.setTurno(turno);
+        atencion.setAsesor(asesor);
+        atencion.setFechaInicio(java.time.LocalDateTime.of(2026, 11, 10, 10, 0));
+
+        when(atencionRepository.findByTurnoId(1L)).thenReturn(Optional.of(atencion));
+        when(atencionMapper.toResponse(any(Atencion.class))).thenAnswer(inv -> {
+            Atencion a = inv.getArgument(0);
+            return new AtencionResponse(a.getId(), a.getTurno().getId(), a.getTurno().getNumeroTurno(),
+                    a.getAsesor().getId(), a.getAsesor().getNombre(), a.getFechaInicio(), a.getFechaFin(),
+                    a.getObservaciones(), a.getResultado(), a.getTiempoEsperaMinutos(),
+                    a.getTiempoAtencionMinutos(), a.getTotalPausasMinutos());
+        });
+
+        AtencionResponse r = service.obtenerAtencionPorTurno(1L);
+
+        assertNotNull(r);
+        assertEquals(7, r.asesorId());
+    }
+
+    @Test
+    void obtenerAtencionPorTurno_inexistente_lanzaResourceNotFound() {
+        when(atencionRepository.findByTurnoId(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> service.obtenerAtencionPorTurno(99L));
+    }
+
+    @Test
+    void finalizarAtencion_cuandoAsesorNoEsElQueAtendio_lanzaExcepcion() {
+        turno.setEstado(EstadoTurno.EN_ATENCION);
+
+        Atencion atencion = new Atencion();
+        atencion.setId(1L);
+        atencion.setTurno(turno);
+        Asesor otro = new Asesor();
+        otro.setId(99);
+        otro.setNombre("Otro");
+        atencion.setAsesor(otro);
+        atencion.setPausas(new java.util.ArrayList<>());
+
+        when(atencionRepository.findByTurnoId(1L)).thenReturn(Optional.of(atencion));
+
+        assertThrows(BadRequestException.class,
+                () -> service.finalizarAtencion(1L, 7, new AtencionRequest("resultado", null)));
+    }
+
+    @Test
+    void finalizarAtencion_estadoNoAtencionNiPausa_lanzaExcepcion() {
+        turno.setEstado(EstadoTurno.FINALIZADO);
+
+        Atencion atencion = new Atencion();
+        atencion.setId(1L);
+        atencion.setTurno(turno);
+        atencion.setAsesor(asesor);
+        atencion.setPausas(new java.util.ArrayList<>());
+
+        when(atencionRepository.findByTurnoId(1L)).thenReturn(Optional.of(atencion));
+
+        assertThrows(BadRequestException.class,
+                () -> service.finalizarAtencion(1L, 7, new AtencionRequest("resultado", null)));
+    }
+
+    @Test
+    void iniciarAtencion_asesorNoDisponible_lanzaExcepcion() {
+        asesor.setDisponible(false);
+        turno.setEstado(EstadoTurno.EN_ESPERA);
+
+        when(turnoRepository.findById(1L)).thenReturn(Optional.of(turno));
+        when(asesorRepository.findById(7)).thenReturn(Optional.of(asesor));
+        when(turnoRepository.existsByEstadoAndAsesor(EstadoTurno.EN_ATENCION, asesor)).thenReturn(false);
+        when(turnoRepository.existsByEstadoAndAsesor(EstadoTurno.EN_PAUSA, asesor)).thenReturn(false);
+
+        assertThrows(BadRequestException.class, () -> service.iniciarAtencion(1L, 7));
+    }
+
+    @Test
+    void iniciarAtencion_estadoFinalizado_lanzaExcepcion() {
+        turno.setEstado(EstadoTurno.FINALIZADO);
+
+        when(turnoRepository.findById(1L)).thenReturn(Optional.of(turno));
+
+        assertThrows(BadRequestException.class, () -> service.iniciarAtencion(1L, 7));
+    }
+
+
     /* ==================== Auditoria ==================== */
 
     @Test
