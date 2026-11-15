@@ -1,5 +1,31 @@
 # Changelog — Agendaty
 
+## [1.3.0] — Navegación sin login/registro con sesión activa (2026-11-15)
+
+### 🆕 Nuevas funcionalidades
+
+- Con sesión iniciada, **ningún lugar de la app muestra «Iniciar sesión» ni «Registrarse»**: header de la landing, hero y CTA final muestran en su lugar **«Ir a mi panel»** (ruta destino según rol) y un **menú de usuario** desplegable (iniciales, nombre, rol, Cerrar sesión) idéntico al de la navbar de la app.
+- **`/login` y `/registro` redireccionan** al panel del rol con sesión (sin dejar historial).
+- **Cerrar sesión** vuelve a la landing con toast «Sesión cerrada» y limpia estado y localStorage.
+- **Sincronía entre pestañas** del mismo origen vía `storage` + `focus`: en una pestaña cierras sesión, las demás lo detectan y repintan sin recargar.
+- **Fuente única de la sesión**: `AuthContext` expone `user/loading/isAuthenticated/tieneRol`; `getHomeByRole` en `src/utils/roleRoutes.ts` decide el panel por rol para navbar, landing, login, guards y redirects.
+
+### 🐛 Correcciones
+
+- **localStorage corrupto ya no rompe la app**: `authService.getUser()` devuelve `null` y limpia atómicamente `user`/`token` si faltan `rol` o el JSON es inválido.
+- **Sin parpadeo al recargar (F5)**: la sesión se restaura de forma síncrona; los CTAs muestran placeholder del mismo tamaño mientras tanto.
+- **Cerrar sesión desde un panel protegido** sale a la landing en vez de a `/login`.
+- **Panel de destino único por rol** definido en un solo sitio (`getHomeByRole`), eliminada la duplicación en login/guards/navbar.
+
+### 🔧 Mejoras
+
+- `PublicNav` y `UserMenu` extraídos como componentes compartidos (reuso estricto entre landing y navbar).
+- `Navbar` simplificada: hamburguesa móvil con el mismo set de enlaces + cerrar sesión; sin botones de login/registro con sesión.
+- Suite de pruebas: **31 tests** (antes 18) con `PublicNav`, authService tolerante a corrupción y redirects de `/login`/`/registro`.
+- `tsc` 0 errores · `lint` 0 warnings · `build` OK.
+
+---
+
 ## [1.2.0] — Dashboard de Administración rediseñado (2026-11-15)
 
 ### 🆕 Nuevas funcionalidades

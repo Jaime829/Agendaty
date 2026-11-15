@@ -1,5 +1,20 @@
 # Documentación del Frontend — Agendaty
 
+Rediseñado el 2026-11-15 (rama `fix/navbar-sesion-activa`, hereda de `feature/dashboard-redesign`). Ver `docs/frontend-audit.md`, `docs/dashboard-audit.md` y `docs/decisions.md` para el historial.
+
+## Sesión y navegación pública (2026-11-15, `fix/navbar-sesion-activa`)
+
+- **Sin sesión**, el header de la landing muestra: «Iniciar sesión» y «Crear cuenta»; hero y CTA final muestran «Crear mi cuenta» + «Iniciar sesión» como antes.
+- **Con sesión**, esas llamadas a la acción desaparecen en toda la landing (header, hero y CTA final). En su lugar aparece **«Ir a mi panel»** → ruta del rol actual y un **menú de usuario** desplegable (iniciales, nombre, rol, **Cerrar sesión**) en el header — el mismo `UserMenu` que usa la navbar de la app.
+- **Fuente única de verdad de la sesión**: `AuthContext` expone `user`, `loading`, `isAuthenticated`, `tieneRol`, `tieneAlgunaRol`, `login`, `logout`. `authService.getUser()` devuelve `null` (y limpia localStorage) si el dato está corrupto, en vez de romper la app.
+- **Panel por rol definido en un único sitio**: `getHomeByRole(rol)` en `src/utils/roleRoutes.ts` (`CIUDADANO → /ciudadano`, `RECEPCIONISTA → /recepcionista`, `ASESOR → /asesor`, `COORDINADOR → /coordinador`, `ADMINISTRADOR → /administrador`). Reutilizado por `PublicNav`, landing, `Navbar`, `LoginPage`, `ProtectedRoute` y `useRolGuard`.
+- **Rutas públicas con sesión activa** (`/login`, `/registro`): redirigen con `replace` al panel del rol. Sin sesión, todo sigue igual.
+- **Navbar de la app** (`Navbar.tsx`) oculta en rutas públicas; muestra enlaces del rol + `UserMenu` + hamburguesa móvil; el cierre de sesión vuelve a la landing.
+- **Sincronía entre pestañas** (mismo origen): `AuthContext` reescucha `storage` y `focus`; si cierras sesión en una pestaña, las demás actualizan su UI (botones de login reaparecen) sin recargar.
+- **Cierre de sesión**: limpia estado y localStorage, vuelve a `/` y muestra toast «Sesión cerrada» (Sonner). Desde un panel protegido, redirige a `/` con `replace`.
+- **Sin parpadeo**: la sesión se restaura de forma síncrona al montar el proveedor; mientras tanto, CTAs muestran un placeholder del mismo tamaño (nunca login ni panel).
+- `Loading` es constante `false` con restauración síncrona; si en el futuro se vuelve asíncrono, el placeholder ya está implementado en `PublicNav`/Landing.
+
 Rediseñado el 2026-11-15 (rama `feature/dashboard-redesign`, hereda del rediseño global `feature/frontend-redesign`). Ver `docs/frontend-audit.md` (auditoría global) y `docs/dashboard-audit.md` (auditoría del dashboard de Administración) así como `docs/decisions.md` (ADR-011 a ADR-019) para las decisiones.
 
 ## Novedades del dashboard de Administración (Fase 3, 2026-11-15)
