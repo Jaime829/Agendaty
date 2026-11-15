@@ -31,23 +31,33 @@ export default function CoordinadorPage() {
   const cargarTodo = useCallback(async (silencioso = true) => {
     if (!silencioso) setCargandoInicial(true);
     try {
-      const [t, r, a] = await Promise.all([
+      const [t, r] = await Promise.all([
         turnosService.listar(),
         reportesService.tiempoEsperaPromedio(),
-        asesoresService.listar(),
       ]);
       if (!montado.current) return;
       setTurnos(t ?? []);
       setReporte(r);
-      setAsesores(a ?? []);
       setUltimaActualizacion(new Date());
       setError(null);
-    } catch (e: any) {
-      if (montado.current) setError(e.message || 'No se pudo actualizar el monitor');
+    } catch {
+      if (montado.current) setError('No se pudo actualizar el monitor. Revisa que el backend esté disponible.');
     } finally {
       if (montado.current) setCargandoInicial(false);
     }
   }, []);
+
+  // Asesores en un efecto separado: GET /asesores puede fallar (el backend lanza NPE
+  // si un asesor no tiene ventanilla asignada); degradación graceful del panel.
+  useEffect(() => {
+    if (sesionLoading) return;
+    let activo = true;
+    asesoresService
+      .listar()
+      .then((a) => { if (activo) setAsesores(a ?? []); })
+      .catch(() => { if (activo) setAsesores([]); });
+    return () => { activo = false; };
+  }, [sesionLoading]);
 
   useEffect(() => {
     montado.current = true;
@@ -55,12 +65,11 @@ export default function CoordinadorPage() {
     const cargar = () =>
       // Inline (no llamar a cargarTodo): la regla react-hooks/set-state-in-effect
       // no admite invocar desde el efecto funciones que llaman setState.
-      Promise.all([turnosService.listar(), reportesService.tiempoEsperaPromedio(), asesoresService.listar()])
-        .then(([t, r, a]) => {
+      Promise.all([turnosService.listar(), reportesService.tiempoEsperaPromedio()])
+        .then(([t, r]) => {
           if (!montado.current) return;
           setTurnos(t ?? []);
           setReporte(r);
-          setAsesores(a ?? []);
           setUltimaActualizacion(new Date());
           setError(null);
         })
