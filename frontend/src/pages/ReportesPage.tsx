@@ -54,8 +54,10 @@ export default function ReportesPage() {
   if (!esPermitido) return null;
 
   const maxTramite = (tramites ?? []).reduce((m, t) => Math.max(m, Number(t.cantidad) || 0), 0) || 1;
-  const totalAtendidos = Number(atendidos?.atendidos ?? 0);
-  const totalNoAtendidos = Number(atendidos?.noAtendidos ?? 0);
+  const atendidosTotal = atendidos?.atendidos ?? 0;
+  const noAtendidosTotal = atendidos?.no_atendidos ?? atendidos?.noAtendidos ?? 0;
+  const totalAtendidos = Number(atendidosTotal);
+  const totalNoAtendidos = Number(noAtendidosTotal);
   const total = totalAtendidos + totalNoAtendidos;
   const tasaAtencion = total > 0 ? Math.round((totalAtendidos / total) * 100) : null;
 
@@ -107,7 +109,7 @@ export default function ReportesPage() {
             {[
               { etiqueta: 'Espera promedio', valor: promedio?.valor != null ? `${promedio.valor} min` : '—' },
               { etiqueta: 'Atendidos', valor: atendidos?.atendidos ?? '—' },
-              { etiqueta: 'No atendidos', valor: atendidos?.noAtendidos ?? '—' },
+              { etiqueta: 'No atendidos', valor: atendidos?.no_atendidos ?? atendidos?.noAtendidos ?? '—' },
               { etiqueta: 'Tasa de atención', valor: tasaAtencion != null ? `${tasaAtencion}%` : '—' },
             ].map(({ etiqueta, valor }) => (
               <div key={etiqueta} className="rounded-xl border border-slate-200 bg-white p-4 shadow-card">
@@ -134,10 +136,12 @@ export default function ReportesPage() {
               <ol className="space-y-3">
                 {[...tramites]
                   .sort((a, b) => Number(b.cantidad) - Number(a.cantidad))
-                  .map((t, i) => (
-                    <li key={`${t.tipoTramite}-${i}`} className="flex items-center gap-4">
-                      <span className="w-48 shrink-0 truncate text-sm text-slate-600" title={t.tipoTramite}>
-                        {t.tipoTramite}
+                  .map((t, i) => {
+                    const nombre = t.tipo_tramite_nombre ?? t.tipoTramite ?? 'Sin nombre';
+                    return (
+                    <li key={`${nombre}-${i}`} className="flex items-center gap-4">
+                      <span className="w-48 shrink-0 truncate text-sm text-slate-600" title={nombre}>
+                        {nombre}
                       </span>
                       <div className="h-6 flex-1 overflow-hidden rounded-md bg-slate-100">
                         <div
@@ -147,7 +151,8 @@ export default function ReportesPage() {
                       </div>
                       <span className="w-12 text-right text-sm font-semibold tabular-nums text-slate-900">{t.cantidad}</span>
                     </li>
-                  ))}
+                    );
+                  })}
               </ol>
             )}
           </Card>

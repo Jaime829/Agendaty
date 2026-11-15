@@ -83,8 +83,8 @@ Autenticación: header `X-Usuario-Id` en peticiones protegidas. Esquema didácti
 | Método | Ruta | Roles | Request | Response | Códigos |
 |--------|------|-------|---------|----------|---------|
 | GET | `/reportes/tiempo-espera-promedio` | COORDINADOR, ADMINISTRADOR | `fechaDesde, fechaHasta` (opcional) | `{metrica, valor, cantidad_atenciones, fecha_desde, fecha_hasta}` | 200, 403 |
-| GET | `/reportes/turnos-atendidos` | COORDINADOR, ADMINISTRADOR | `fechaDesde, fechaHasta` | `{atendidos, noAtendidos, total}` | 200, 403 |
-| GET | `/reportes/tramites-frecuentes` | COORDINADOR, ADMINISTRADOR | `fechaDesde, fechaHasta` | `[{tipoTramite, cantidad}]` | 200, 403 |
+| GET | `/reportes/turnos-atendidos` | COORDINADOR, ADMINISTRADOR | `fechaDesde, fechaHasta` | `{metrica, atendidos, no_atendidos, total, fecha_desde, fecha_hasta}` | 200, 403 |
+| GET | `/reportes/tramites-frecuentes` | COORDINADOR, ADMINISTRADOR | `fechaDesde, fechaHasta` | `[{tipo_tramite_id, tipo_tramite_nombre, cantidad}]` | 200, 403 |
 
 ---
 
@@ -100,3 +100,4 @@ Autenticación: header `X-Usuario-Id` en peticiones protegidas. Esquema didácti
 | 403 | No autorizado (rol insuficiente) |
 | 404 | Recurso no encontrado |
 | 409 | Conflicto (turno ya tomado, asesor con turno activo, etc.) |
+
