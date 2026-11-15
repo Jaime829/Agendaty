@@ -35,11 +35,6 @@ export function Navbar() {
   const location = useLocation();
   const [menuAbierto, setMenuAbierto] = useState(false);
 
-  // Cierra el menú móvil al navegar
-  useEffect(() => {
-    setMenuAbierto(false);
-  }, [location.pathname]);
-
   // Bloquea el scroll del body cuando el menú móvil está abierto
   useEffect(() => {
     document.body.style.overflow = menuAbierto ? 'hidden' : '';
@@ -64,6 +59,7 @@ export function Navbar() {
         to={i.path}
         aria-current="page"
         aria-label={i.label}
+        onClick={() => setMenuAbierto(false)}
         className={({ isActive }) =>
           `flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
             isActive

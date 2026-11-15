@@ -46,13 +46,30 @@ export default function CoordinadorPage() {
   useEffect(() => {
     montado.current = true;
     if (sesionLoading) return;
-    cargarTodo(false);
-    const id = setInterval(() => cargarTodo(true), INTERVALO_MS);
+    const cargar = () =>
+      // Inline (no llamar a cargarTodo): la regla react-hooks/set-state-in-effect
+      // no admite invocar desde el efecto funciones que llaman setState.
+      Promise.all([turnosService.listar(), reportesService.tiempoEsperaPromedio()])
+        .then(([t, r]) => {
+          if (!montado.current) return;
+          setTurnos(t ?? []);
+          setReporte(r);
+          setUltimaActualizacion(new Date());
+          setError(null);
+        })
+        .catch((e: any) => {
+          if (montado.current) setError(e.message || 'No se pudo actualizar el monitor');
+        })
+        .finally(() => {
+          if (montado.current) setCargandoInicial(false);
+        });
+    cargar();
+    const id = setInterval(cargar, INTERVALO_MS);
     return () => {
       montado.current = false;
       clearInterval(id);
     };
-  }, [sesionLoading, cargarTodo]);
+  }, [sesionLoading]);
 
   if (!esPermitido) return null;
 

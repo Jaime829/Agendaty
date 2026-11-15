@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
 import { authService } from '@/api/auth';
 import type { AuthUser } from '@/types';
 
@@ -13,17 +13,13 @@ const AuthContext = createContext<{
 } | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const u = authService.getUser();
+  // La sesión se restaura de forma síncrona desde localStorage (sin parpadeos ni efecto extra)
+  const [user, setUser] = useState<AuthUser | null>(() => {
+    const storedUser = authService.getUser();
     const token = authService.getToken();
-    if (u && token) {
-      setUser(u);
-    }
-    setLoading(false);
-  }, []);
+    return storedUser && token ? storedUser : null;
+  });
+  const [loading] = useState(false);
 
   const login = useCallback((userData: AuthUser) => {
     authService.setToken(userData.token);

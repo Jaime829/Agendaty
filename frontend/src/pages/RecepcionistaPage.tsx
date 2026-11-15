@@ -32,7 +32,6 @@ export default function RecepcionistaPage() {
   const [cancelando, setCancelando] = useState(false);
 
   const cargarTurnos = useCallback(async () => {
-    setCargandoTurnos(true);
     try {
       const data = await turnosService.listar();
       setTurnos(data ?? []);
@@ -48,8 +47,12 @@ export default function RecepcionistaPage() {
       .listar()
       .then(setTipos)
       .catch((e: any) => setError(e.message || 'No se pudo cargar los tipos de trámite'));
-    cargarTurnos();
-  }, [cargarTurnos]);
+    turnosService
+      .listar()
+      .then((data) => setTurnos(data ?? []))
+      .catch((e: any) => setError(e.message || 'No se pudo cargar la cola de turnos'))
+      .finally(() => setCargandoTurnos(false));
+  }, []);
 
   const generarTurno = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -11,7 +11,9 @@
   }
 
   body {
-    @apply bg-surface text-slate-900 antialiased;
+    background-color: #f6f8fb;
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     font-feature-settings: 'cv11', 'ss01';
   }
@@ -32,7 +34,12 @@
 @layer components {
   /* Tarjetas de panel (patrón repetido en toda la app) */
   .card {
-    @apply rounded-xl border border-slate-200 bg-white shadow-card;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    box-shadow:
+      0 1px 2px 0 rgb(15 23 42 / 0.05),
+      0 4px 16px -4px rgb(15 23 42 / 0.08);
   }
 
   /* Tablas de datos compartidas */
@@ -55,12 +62,30 @@
     @apply py-2.5 align-middle;
   }
 
-  /* Contenedor de enlace para saltar al contenido principal (a11y) */
+  /* Enlace para saltar al contenido principal (a11y) */
   .skip-link {
-    @apply sr-only;
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    white-space: nowrap;
   }
   .skip-link:focus-visible {
-    @apply not-sr-only fixed left-4 top-4 z-toast rounded-md bg-brand-800 px-4 py-3 text-sm font-semibold text-white shadow-pop;
+    left: 1rem;
+    top: 1rem;
+    width: auto;
+    height: auto;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    background: #0f3a63;
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    z-index: 60;
+    outline: 3px solid #175b9c;
+    outline-offset: 2px;
   }
 }
 

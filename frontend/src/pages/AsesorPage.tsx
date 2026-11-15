@@ -31,10 +31,9 @@ export default function AsesorPage() {
 
   const cargarTurnoActivo = useCallback(async () => {
     if (!user) return;
-    setCargando(true);
-    setErrorCarga(null);
     try {
       const data: any[] = await turnosService.listar();
+      setErrorCarga(null);
       const activo = (data ?? []).find(
         (t) => t.asesorId === user.usuarioId && ESTADOS_ACTIVOS.includes(t.estado)
       );
@@ -58,9 +57,34 @@ export default function AsesorPage() {
   }, [user]);
 
   useEffect(() => {
-    if (sesionLoading) return;
-    cargarTurnoActivo();
-  }, [sesionLoading, cargarTurnoActivo]);
+    if (sesionLoading || !user) return;
+    // Inline (no llamar a cargarTurnoActivo): la regla react-hooks/set-state-in-effect
+    // no admite invocar desde el efecto funciones que llaman setState.
+    turnosService
+      .listar()
+      .then((data: any[]) => {
+        setErrorCarga(null);
+        const activo = (data ?? []).find(
+          (t) => t.asesorId === user.usuarioId && ESTADOS_ACTIVOS.includes(t.estado)
+        );
+        if (!activo) {
+          setTurno(null);
+          setAtencion(null);
+          setCargando(false);
+          return;
+        }
+        setTurno(activo);
+        atencionesService
+          .obtenerPorTurno(activo.id)
+          .then(setAtencion)
+          .catch(() => setAtencion(null)); // aún no hay atención registrada
+        setCargando(false);
+      })
+      .catch((e: any) => {
+        setErrorCarga(e.message || 'No se pudo cargar el turno');
+        setCargando(false);
+      });
+  }, [sesionLoading, user]);
 
   const llamarSiguiente = useCallback(async () => {
     if (accionEnCurso || !user) return;

@@ -33,8 +33,9 @@ export default function AdministradorPage() {
   const [creando, setCreando] = useState(false);
   const [form, setForm] = useState({ nombre: '', correo: '', password: '', documento: '', telefono: '', rol: 'ROLE_ASESOR' });
 
+  // Nota: no pone cargandoLista=true aquí; el estado inicial ya es "cargando"
+  // y react-hooks/set-state-in-effect prohíbe setState síncrono dentro de efectos.
   const cargarUsuarios = useCallback(async () => {
-    setCargandoLista(true);
     try {
       const data = await usuariosService.listar();
       setUsuarios(data ?? []);
@@ -46,8 +47,15 @@ export default function AdministradorPage() {
   }, []);
 
   useEffect(() => {
-    if (esPermitido) cargarUsuarios();
-  }, [esPermitido, cargarUsuarios]);
+    if (!esPermitido) return;
+    // Inline (no llamar a cargarUsuarios): la regla react-hooks/set-state-in-effect
+    // no admite invocar desde el efecto funciones que llaman setState.
+    usuariosService
+      .listar()
+      .then((data) => setUsuarios(data ?? []))
+      .catch((e: any) => setError(e.message || 'No se pudo cargar la lista de usuarios'))
+      .finally(() => setCargandoLista(false));
+  }, [esPermitido]);
 
   const crearUsuario = async (e: React.FormEvent) => {
     e.preventDefault();
