@@ -104,7 +104,7 @@ Formato `{CODIGO_TRAMITE}{P|N}-{NNNNN}` donde:
 
 | Método | Ruta | Roles | Request | Response | Códigos |
 |--------|------|-------|---------|----------|---------|
-| GET | `/reportes/tiempo-espera-promedio` | COORDINADOR, ADMINISTRADOR | `fechaDesde, fechaHasta` (query, opcional) | `{metrica, valor, cantidad_atenciones, fecha_desde, fecha_hasta}` | 200, 403 |
+| GET | `/reportes/tiempo-espera-promedio` | COORDINADOR, ADMINISTRADOR | `fechaDesde, fechaHasta` (query, opcional, ISO-8601 datetime) | `{metrica, valor, cantidad_atenciones, fecha_desde, fecha_hasta}` | 200, 403 |
 | GET | `/reportes/turnos-atendidos` | COORDINADOR, ADMINISTRADOR | `fechaDesde, fechaHasta` (query) | `{metrica, atendidos, no_atendidos, total, fecha_desde, fecha_hasta}` | 200, 403 |
 | GET | `/reportes/tramites-frecuentes` | COORDINADOR, ADMINISTRADOR | `fechaDesde, fechaHasta` (query) | `[{tipo_tramite_id, tipo_tramite_nombre, cantidad}]` | 200, 403 |
 
@@ -127,4 +127,5 @@ Formato `{CODIGO_TRAMITE}{P|N}-{NNNNN}` donde:
 | Asesor | Login, Panel asesor, Llamar siguiente, Iniciar/pausar/reanudar/finalizar | Login → Llamar siguiente → Iniciar atención → Pausar/reanudar → Finalizar con resultado |
 | Coordinador | Login, Monitor de cola, Carga por asesor, Reportes | Login → Ver cola en vivo → Ver carga por asesor → Reportes |
 | Administrador | Login, Gestión usuarios, Ventanillas, Tipos de trámite | Login → Registrar usuarios internos → Gestionar ventanillas y trámites |
+
 
