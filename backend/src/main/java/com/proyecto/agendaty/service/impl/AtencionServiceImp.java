@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -149,7 +150,7 @@ public class AtencionServiceImp implements AtencionService {
 
         LocalDateTime ahora = LocalDateTime.now(clock);
         ultima.setFechaFin(ahora);
-        ultima.setDuracionMinutos((int) ChronoUnit.MINUTES.between(ultima.getFechaInicio(), ahora));
+        ultima.setDuracionMinutos((int) minutosEntre(ultima.getFechaInicio(), ahora));
         pausaRepository.save(ultima);
 
         Turno turno = atencion.getTurno();
@@ -192,7 +193,7 @@ public class AtencionServiceImp implements AtencionService {
         LocalDateTime inicio = atencion.getFechaInicio();
         Long esperaMinutos = null;
         if (turno.getFechaCreacion() != null && turno.getFechaLlamado() != null) {
-            esperaMinutos = ChronoUnit.MINUTES.between(turno.getFechaCreacion(), turno.getFechaLlamado());
+            esperaMinutos = minutosEntre(turno.getFechaCreacion(), turno.getFechaLlamado());
         }
         atencion.setTiempoEsperaMinutos(esperaMinutos != null ? esperaMinutos.intValue() : null);
 
@@ -202,7 +203,7 @@ public class AtencionServiceImp implements AtencionService {
                 .sum();
         atencion.setTotalPausasMinutos(totalPausas.intValue());
 
-        Long atencionMinutos = ChronoUnit.MINUTES.between(inicio, ahora) - totalPausas;
+        Long atencionMinutos = minutosEntre(inicio, ahora) - totalPausas;
         atencion.setTiempoAtencionMinutos(atencionMinutos.intValue());
 
         Atencion finalizada = atencionRepository.save(atencion);
@@ -242,5 +243,15 @@ public class AtencionServiceImp implements AtencionService {
         auditoria.setFecha(LocalDateTime.now(clock));
         auditoria.setDetalles(detalles);
         auditoriaRepository.save(auditoria);
+    }
+
+    /**
+     * SonarQube: calcula una duración en minutos con tipos time zone-aware (ZonedDateTime).
+     * Las entidades guardan LocalDateTime; se convierten al huso horario del sistema
+     * antes de computar la diferencia entre timestamps.
+     */
+    private static long minutosEntre(LocalDateTime from, LocalDateTime to) {
+        ZoneId zone = ZoneId.systemDefault();
+        return ChronoUnit.MINUTES.between(from.atZone(zone), to.atZone(zone));
     }
 }
