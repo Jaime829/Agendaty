@@ -22,6 +22,19 @@ export interface TipoTramite {
   activo: boolean;
 }
 
+export interface TipoTramiteRequest {
+  nombre: string;
+  codigo: string;
+  esPrioritarioPorDefecto?: boolean;
+  activo?: boolean;
+}
+
+export interface TurnoRequest {
+  ciudadanoId: number;
+  tipoTramiteId: number;
+  prioritario?: boolean;
+}
+
 export interface Atencion {
   id: number;
   turnoId: number;

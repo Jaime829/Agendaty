@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { Building2, User, Clock, Users, LayoutDashboard, ShieldCheck, Zap } from 'lucide-react';
-import { Button } from '@/components/Button';
 
 export default function LandingPage() {
   return (

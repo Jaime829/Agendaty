@@ -1,6 +1,5 @@
 import api from './client';
 import type { TipoTramite, TipoTramiteRequest } from '@/types';
-import type { AxiosResponse } from 'axios';
 
 export const tiposTramiteService = {
   listar: (): Promise<TipoTramite[]> =>

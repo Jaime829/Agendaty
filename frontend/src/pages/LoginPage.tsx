@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { authService } from '@/api/auth';
 import { useAuthContext } from '@/context/AuthContext';
 import { Button } from '@/components/Button';
@@ -10,7 +9,6 @@ import type { LoginRequest } from '@/types';
 import { getRouteByRol } from '@/utils/roleRoutes';
 
 export default function LoginPage() {
-  const navigate = useNavigate();
   const { login, loading } = useAuthContext();
   const [form, setForm] = useState<LoginRequest>({ correo: '', password: '' });
   const [error, setError] = useState<string | null>(null);

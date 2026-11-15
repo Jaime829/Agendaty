@@ -3,10 +3,8 @@ import {
   BrowserRouter,
   Routes,
   Route,
-  Navigate,
-  useLocation,
 } from 'react-router-dom';
-import { AuthProvider, useAuthContext } from '@/context/AuthContext';
+import { AuthProvider } from '@/context/AuthContext';
 import { Navbar } from '@/components/Navbar';
 import LandingPage from '@/pages/LandingPage';
 import RegistroPage from '@/pages/RegistroPage';

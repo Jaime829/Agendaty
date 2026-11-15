@@ -1,17 +1,29 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { usuariosService, tiposTramiteService, asesoresService } from '@/api';
+import { usuariosService } from '@/api';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { Select } from '@/components/Select';
 import { Alert } from '@/components/Alert';
-import { Loading } from '@/components/Loading';
 import { useAuthContext } from '@/context/AuthContext';
 import { getRouteByRol } from '@/utils/roleRoutes';
 
 export default function AdministradorPage() {
   const { user, tieneRol } = useAuthContext();
   const navigate = useNavigate();
+
+  const [usuarios, setUsuarios] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({ nombre: '', correo: '', password: '', documento: '', telefono: '', rol: 'ROLE_ASESOR' });
+
+  const esAdmin = !!user && tieneRol('ROLE_ADMINISTRADOR');
+
+  const cerrarError = () => {
+    setError(null);
+    setFieldErrors({});
+  };
 
   useEffect(() => {
     if (!user) {
@@ -22,26 +34,12 @@ export default function AdministradorPage() {
       navigate(getRouteByRol(user.rol));
       return;
     }
-  }, [tieneRol, navigate, user?.rol]);
+    cargarUsuarios();
+  }, [tieneRol, navigate, user]);
 
-  if (!tieneRol('ROLE_ADMINISTRADOR')) {
+  if (!esAdmin) {
     return null;
   }
-
-  const [usuarios, setUsuarios] = useState<any[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ nombre: '', username: '', password: '', email: '', rol: 'ROLE_CIUDADANO' });
-
-  const cerrarError = () => {
-    setError(null);
-    setFieldErrors({});
-  };
-
-  useEffect(() => {
-    cargarUsuarios();
-  }, []);
 
   const cargarUsuarios = async () => {
     setLoading(true);
@@ -56,24 +54,13 @@ export default function AdministradorPage() {
     }
   };
 
-  const cargarAsesores = async () => {
-    try {
-      const data = await asesoresService.listar();
-      setUsuarios(data);
-    } catch (e: any) {
-      setError(e.message || 'Error cargando asesores');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const crearUsuario = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
       await usuariosService.crear(form);
-      setForm({ nombre: '', username: '', password: '', email: '', rol: 'ROLE_CIUDADANO' });
+      setForm({ nombre: '', correo: '', password: '', documento: '', telefono: '', rol: 'ROLE_ASESOR' });
       cargarUsuarios();
     } catch (e: any) {
       setError(e.message || 'Error creando usuario');
@@ -101,9 +88,29 @@ export default function AdministradorPage() {
               required
             />
             <Input
-              label="Usuario"
-              value={form.username}
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
+              label="Correo"
+              type="email"
+              placeholder="usuario@email.com"
+              value={form.correo}
+              onChange={(e) => setForm({ ...form, correo: e.target.value })}
+              required
+            />
+            <Input
+              label="Documento"
+              placeholder="12345678"
+              pattern="\d{5,10}"
+              title="El documento debe tener entre 5 y 10 dígitos"
+              value={form.documento}
+              onChange={(e) => setForm({ ...form, documento: e.target.value })}
+              required
+            />
+            <Input
+              label="Teléfono"
+              placeholder="3001234567"
+              pattern="\d{7,10}"
+              title="El teléfono debe tener entre 7 y 10 dígitos"
+              value={form.telefono}
+              onChange={(e) => setForm({ ...form, telefono: e.target.value })}
               required
             />
             <Input
@@ -132,7 +139,7 @@ export default function AdministradorPage() {
             <table className="w-full text-sm text-left">
               <thead>
                 <tr className="border-b border-slate-200">
-                  <th className="pb-2 text-slate-500 font-semibold">Usuario</th>
+                  <th className="pb-2 text-slate-500 font-semibold">Correo</th>
                   <th className="pb-2 text-slate-500 font-semibold">Rol</th>
                   <th className="pb-2 text-slate-500 font-semibold">Nombre</th>
                 </tr>
@@ -140,7 +147,7 @@ export default function AdministradorPage() {
               <tbody>
                 {usuarios.map((u) => (
                   <tr key={u.id} className="border-b border-slate-100">
-                    <td className="py-2">{u.username}</td>
+                    <td className="py-2">{u.correo}</td>
                     <td className="py-2">{u.rol}</td>
                     <td className="py-2">{u.nombre}</td>
                   </tr>

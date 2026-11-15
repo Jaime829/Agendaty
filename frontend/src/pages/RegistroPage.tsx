@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '@/api/auth';
-import { useAuthContext } from '@/context/AuthContext';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { Alert } from '@/components/Alert';
@@ -10,7 +9,6 @@ import type { RegisterRequest } from '@/types';
 
 export default function RegistroPage() {
   const navigate = useNavigate();
-  const { loading } = useAuthContext();
   const [form, setForm] = useState<RegisterRequest>({
     nombre: '',
     correo: '',

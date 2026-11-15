@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { turnosService, reportesService, asesoresService } from '@/api';
+import { turnosService, reportesService } from '@/api';
 import { BadgeEstado } from '@/components/BadgeEstado';
 import { Alert } from '@/components/Alert';
 import { Loading } from '@/components/Loading';
@@ -13,7 +13,7 @@ export default function CoordinadorPage() {
   const [turnos, setTurnos] = useState<any[]>([]);
   const [reporte, setReporte] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loadingState, setLoading] = useState(false);
+  const [loadingState] = useState(false);
 
   useEffect(() => {
     if (loading) return;

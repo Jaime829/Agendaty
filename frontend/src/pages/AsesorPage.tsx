@@ -5,7 +5,6 @@ import { BadgeEstado } from '@/components/BadgeEstado';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { Alert } from '@/components/Alert';
-import { Loading } from '@/components/Loading';
 import { useAuthContext } from '@/context/AuthContext';
 import { getRouteByRol } from '@/utils/roleRoutes';
 
@@ -35,7 +34,7 @@ export default function AsesorPage() {
   const cargarTurno = async () => {
     setLoading(true);
     try {
-      const data = await turnosService.obtener(Number(user.usuarioId ?? 1));
+      const data = await turnosService.obtener(Number(user?.usuarioId ?? 1));
       setTurno(data);
       if (data.id) {
         try {
@@ -56,7 +55,7 @@ export default function AsesorPage() {
     setError(null);
     setLoading(true);
     try {
-      const data = await turnosService.llamarSiguiente(Number(user.usuarioId ?? 0));
+      const data = await turnosService.llamarSiguiente(Number(user?.usuarioId ?? 0));
       setTurno(data);
       setAtencion(null);
     } catch (e: any) {
@@ -72,10 +71,10 @@ export default function AsesorPage() {
     try {
       const data = await atencionesService.iniciar({
         turnoId: turno.id,
-        asesorId: Number(user.usuarioId ?? 0),
+        asesorId: Number(user?.usuarioId ?? 0),
       });
       setAtencion(data);
-      setTurno((t) => (t ? { ...t, estado: 'EN_ATENCION' } : t));
+      setTurno((t: any) => (t ? { ...t, estado: 'EN_ATENCION' } : t));
     } catch (e: any) {
       setError(e.message || 'Error iniciando atención');
     } finally {
@@ -85,9 +84,9 @@ export default function AsesorPage() {
 
   const pausar = async () => {
     try {
-      const data = await atencionesService.pausar(turno.id, Number(user.usuarioId ?? 0));
+      const data = await atencionesService.pausar(turno.id, Number(user?.usuarioId ?? 0));
       setAtencion(data);
-      setTurno((t) => (t ? { ...t, estado: 'EN_PAUSA' } : t));
+      setTurno((t: any) => (t ? { ...t, estado: 'EN_PAUSA' } : t));
     } catch (e: any) {
       setError(e.message || 'Error pausando');
     }
@@ -95,9 +94,9 @@ export default function AsesorPage() {
 
   const reanudar = async () => {
     try {
-      const data = await atencionesService.reanudar(turno.id, Number(user.usuarioId ?? 0));
+      const data = await atencionesService.reanudar(turno.id, Number(user?.usuarioId ?? 0));
       setAtencion(data);
-      setTurno((t) => (t ? { ...t, estado: 'EN_ATENCION' } : t));
+      setTurno((t: any) => (t ? { ...t, estado: 'EN_ATENCION' } : t));
     } catch (e: any) {
       setError(e.message || 'Error reanudando');
     }
@@ -113,12 +112,12 @@ export default function AsesorPage() {
     try {
       const data = await atencionesService.finalizar({
         turnoId: turno.id,
-        asesorId: Number(user.usuarioId ?? 0),
+        asesorId: Number(user?.usuarioId ?? 0),
         resultado,
         observaciones,
       });
       setAtencion(data);
-      setTurno((t) => (t ? { ...t, estado: 'FINALIZADO' } : t));
+      setTurno((t: any) => (t ? { ...t, estado: 'FINALIZADO' } : t));
       setResultado('');
       setObservaciones('');
     } catch (e: any) {
