@@ -9,23 +9,23 @@ import {
 const roles = [
   {
     titulo: 'Ciudadano',
-    descripcion: 'Consulta el estado de tu turno y cuánto falta para que te atiendan.',
+    descripcion: 'Su turno en pantalla: cuándo lo llaman y en qué estado está.',
   },
   {
     titulo: 'Recepcionista',
-    descripcion: 'Registra el trámite y genera el número de turno desde la ventanilla.',
+    descripcion: 'Registra el trámite y entrega el número de turno al ciudadano.',
   },
   {
     titulo: 'Asesor',
-    descripcion: 'Llama al siguiente turno, atiende y finaliza con resultado registrado.',
+    descripcion: 'Llama al siguiente turno y registra el resultado de cada atención.',
   },
   {
     titulo: 'Coordinador',
-    descripcion: 'Ve la cola en vivo y los reportes de tiempos de espera.',
+    descripcion: 'Cola en vivo y reportes de tiempos de espera.',
   },
   {
     titulo: 'Administrador',
-    descripcion: 'Crea usuarios, gestiona ventanillas y tipos de trámite.',
+    descripcion: 'Gestiona usuarios, ventanillas y tipos de trámite.',
   },
 ];
 
@@ -33,22 +33,22 @@ const faqs = [
   {
     pregunta: '¿Cómo obtengo mi número de turno?',
     respuesta:
-      'Una vez en la entidad, el personal de ventanilla registra tu trámite y el sistema genera un número de turno único. Los turnos prioritarios pasan primero (RN3).',
+      'En la entidad, el personal de ventanilla registra tu trámite y el sistema te asigna un número único. Los turnos prioritarios se atienden primero.',
   },
   {
-    pregunta: '¿Qué significa "En espera", "Llamado", "En atención"?',
+    pregunta: '¿Puedo consultar mi turno desde el celular?',
     respuesta:
-      'En espera: tu turno está en la cola. Llamado: te están llamando en este momento. En atención: un asesor ya te está atendiendo. También puedes ver "Finalizado", "Cancelado", "No atendido" y "En pausa".',
+      'Sí. Entra con tu cuenta, ve a «Mi turno» y escribe tu número. Verás si está en espera, llamado, en atención, finalizado, cancelado o no atendido.',
   },
   {
-    pregunta: '¿Qué pasa si no escucho mi llamado?',
+    pregunta: '¿Y si no escucho mi llamado?',
     respuesta:
-      'Si no respondes al llamado, el turno pasa a estado "No atendido" (RN2) y tendrás que volver a solicitar turno. Mantente atento a las pantallas o a tu teléfono.',
+      'Si no respondes al llamado, el turno pasa a «No atendido» y debes solicitar uno nuevo en ventanilla.',
   },
   {
-    pregunta: '¿Quiénes pueden registrar usuarios internos?',
+    pregunta: '¿Crear la cuenta tiene algún costo?',
     respuesta:
-      'Solo un administrador puede crear asesores, recepcionistas, coordinadores y otros administradores, y también ciudadanos manualmente. El registro público solo crea cuentas de ciudadano.',
+      'No. Registrarte como ciudadano es gratis. Las cuentas de asesores, recepcionistas, coordinadores y administradores las crea un administrador.',
   },
 ];
 
@@ -81,32 +81,32 @@ export default function LandingPage() {
         <div className="page-gutter mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 py-14 lg:grid-cols-2 lg:py-20">
           <div className="animate-rise-in">
             <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-brand-800 ring-1 ring-inset ring-brand-200">
-              <BellRing className="h-3.5 w-3.5" aria-hidden="true" /> Turnos con orden y trazabilidad
+              <BellRing className="h-3.5 w-3.5" aria-hidden="true" /> Atención al ciudadano por turnos
             </p>
             <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-5xl">
-              Atención al ciudadano,<br />
-              <span className="text-brand-700">sin esperas innecesarias</span>
+              Toma tu turno y<br />
+              <span className="text-brand-700">llega cuando te toca</span>
             </h1>
             <p className="mt-5 max-w-lg text-lg text-slate-600">
-              Regístrate, toma tu número de turno y conoce tu posición en la cola en tiempo real. Prioridad para
-              quien la necesita y registro completo de cada atención.
+              Regístrate, pide tu número en ventanilla y sigue tu turno en tiempo real: en espera, llamado, en
+              atención. Los turnos prioritarios se atienden primero.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 to="/registro"
-                className="inline-flex h-[52px] items-center justify-center gap-2 rounded-md bg-brand-600 px-6 py-4 text-base font-semibold text-white transition-colors hover:bg-brand-700"
+                className="inline-flex h-[52px] items-center justify-center gap-2 rounded-md bg-brand-600 px-6 text-base font-semibold text-white transition-colors hover:bg-brand-700"
               >
-                Registrarse como ciudadano <ArrowRight className="h-5 w-5" aria-hidden="true" />
+                Crear mi cuenta <ArrowRight className="h-5 w-5" aria-hidden="true" />
               </Link>
               <Link
                 to="/login"
-                className="inline-flex h-[52px] items-center justify-center rounded-md border border-slate-300 bg-white px-6 py-4 text-base font-semibold text-slate-800 transition-colors hover:bg-slate-50"
+                className="inline-flex h-[52px] items-center justify-center rounded-md border border-slate-300 bg-white px-6 text-base font-semibold text-slate-800 transition-colors hover:bg-slate-50"
               >
-                Ya tengo cuenta
+                Iniciar sesión
               </Link>
             </div>
             <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600">
-              {['Número único por turno', 'Prioridad protocolizada', 'Sin listas manuales'].map((t) => (
+              {['Número único por turno', 'Tu turno en pantalla en vivo', 'Los prioritarios atienden primero'].map((t) => (
                 <li key={t} className="flex items-center gap-2">
                   <ShieldCheck className="h-4 w-4 text-green-600" aria-hidden="true" />
                   {t}
@@ -149,7 +149,7 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-4 text-center text-xs text-slate-400">Visual ilustrativo</p>
+              <p className="mt-4 text-center text-xs text-slate-400">Así se verá tu turno en pantalla</p>
             </div>
           </div>
         </div>
@@ -160,13 +160,25 @@ export default function LandingPage() {
         <div className="page-gutter mx-auto max-w-7xl">
           <div className="mx-auto max-w-2xl text-center">
             <h2 id="como-funciona" className="text-2xl font-bold text-slate-900 sm:text-3xl">Cómo funciona</h2>
-            <p className="mt-2 text-slate-600">Tres pasos para una atención ordenada.</p>
+            <p className="mt-2 text-slate-600">De la puerta a la ventanilla en tres pasos.</p>
           </div>
           <ol className="mt-12 grid gap-8 sm:grid-cols-3">
             {[
-              { n: 1, t: 'Regístrate', d: 'Crea tu cuenta de ciudadano con tus datos. Solo tú puedes hacerlo; toma un minuto.' },
-              { n: 2, t: 'Toma tu turno', d: 'El personal de ventanilla registra tu trámite y el sistema asigna un número único. Los prioritarios pasan primero.' },
-              { n: 3, t: 'Espera y sé atendido', d: 'Consulta tu posición en la cola y el estado de tu turno cuando lo necesites.' },
+              {
+                n: 1,
+                t: 'Crea tu cuenta',
+                d: 'Nombre, correo, documento y teléfono. Tu cuenta queda como ciudadana; solo tú puedes crearla.',
+              },
+              {
+                n: 2,
+                t: 'Pide tu turno en ventanilla',
+                d: 'El personal registra tu trámite y el sistema te asigna un número único. Los prioritarios van primero.',
+              },
+              {
+                n: 3,
+                t: 'Sígule el rastro a tu turno',
+                d: 'Consulta tu estado: en espera, llamado, en atención, finalizado, cancelado o no atendido.',
+              },
             ].map(({ n, t, d }) => (
               <li key={n} className="rounded-xl border border-slate-200 p-6">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-600 text-base font-bold text-white">
@@ -185,7 +197,7 @@ export default function LandingPage() {
         <div className="page-gutter mx-auto max-w-7xl">
           <div className="mx-auto max-w-2xl text-center">
             <h2 id="roles" className="text-2xl font-bold text-slate-900 sm:text-3xl">Un sistema para cada rol</h2>
-            <p className="mt-2 text-slate-600">Cada persona ve exactamente lo que necesita.</p>
+            <p className="mt-2 text-slate-600">Cada persona ve exactamente lo que necesita para su trabajo.</p>
           </div>
           <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {roles.map(({ titulo, descripcion }) => (
@@ -203,7 +215,7 @@ export default function LandingPage() {
         <div className="page-gutter mx-auto max-w-4xl">
           <div className="mx-auto max-w-2xl text-center">
             <h2 id="faq" className="text-2xl font-bold text-slate-900 sm:text-3xl">Preguntas frecuentes</h2>
-            <p className="mt-2 text-slate-600">Lo que suelen preguntarnos antes de la primera visita.</p>
+            <p className="mt-2 text-slate-600">Lo que suele preguntar la gente antes de su turno.</p>
           </div>
           <div className="mt-10 divide-y divide-slate-200 rounded-xl border border-slate-200">
             {faqs.map(({ pregunta, respuesta }) => (
@@ -222,9 +234,9 @@ export default function LandingPage() {
       {/* CTA */}
       <section className="bg-brand-800 py-16">
         <div className="page-gutter mx-auto max-w-4xl text-center">
-          <h2 className="text-3xl font-bold text-white">Tu turno, en orden</h2>
+          <h2 className="text-3xl font-bold text-white">La próxima vez, llega y te llaman</h2>
           <p className="mx-auto mt-3 max-w-xl text-brand-100">
-            Regístrate gratis, evita las filas y llega a tu trámite sabiendo exactamente cuándo te atenderán.
+            Crea tu cuenta hoy. Cuando vayas por tu trámite, llevarás un número en la mano y sabrás cuándo te toca.
           </p>
           <Link
             to="/registro"
@@ -242,10 +254,9 @@ export default function LandingPage() {
             <Building2 className="h-5 w-5 text-brand-600" aria-hidden="true" />
             <span className="font-bold text-slate-900">Agendaty</span>
           </div>
-          <p className="text-sm text-slate-500">Plataforma de gestión de turnos y atención al ciudadano.</p>
+          <p className="text-sm text-slate-500">Gestión de turnos y atención al ciudadano.</p>
         </div>
       </footer>
     </div>
   );
 }
-
