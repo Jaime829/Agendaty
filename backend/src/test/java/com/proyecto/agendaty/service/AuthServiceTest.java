@@ -7,6 +7,7 @@ import com.proyecto.agendaty.entity.Asesor;
 import com.proyecto.agendaty.entity.Ciudadano;
 import com.proyecto.agendaty.exceptions.BadRequestException;
 import com.proyecto.agendaty.model.enums.RolUsuario;
+import com.proyecto.agendaty.service.impl.AuthServiceImp;
 import com.proyecto.agendaty.repository.AsesorRepository;
 import com.proyecto.agendaty.repository.CiudadanoRepository;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ class AuthServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
-    private AuthService authService;
+    private AuthServiceImp authService;
 
     /* ==================== RA1: Registro público con rol CIUDADANO forzado ==================== */
 
@@ -124,6 +125,76 @@ class AuthServiceTest {
         assertEquals(RolUsuario.ROLE_ASESOR, RolUsuario.valueOf(response.rol()),
                 "RA4: el rol debe ser ASESOR");
         assertEquals("asesor@email.com", response.correo());
+    }
+
+    /* ==================== RA4: Admin registra ciudadano ==================== */
+
+    @Test
+    void crearUsuarioInterno_adminRegistraCiudadano() {
+        RegisterRequest request = new RegisterRequest(
+                "Carlos Ciudadano", "ciudadano@email.com", "pass123", "11223344", "3001112233", "ROLE_CIUDADANO"
+        );
+
+        when(ciudadanoRepository.existsByCorreo("ciudadano@email.com")).thenReturn(false);
+        when(ciudadanoRepository.existsByDocumento("11223344")).thenReturn(false);
+        when(passwordEncoder.encode("pass123")).thenReturn("hashed");
+        when(ciudadanoRepository.save(any(Ciudadano.class))).thenAnswer(inv -> {
+            Ciudadano c = inv.getArgument(0);
+            c.setId(7);
+            return c;
+        });
+
+        LoginResponse response = authService.crearUsuarioInterno(request);
+
+        assertEquals(RolUsuario.ROLE_CIUDADANO, RolUsuario.valueOf(response.rol()),
+                "RA4: el rol debe ser CIUDADANO");
+        assertEquals("ciudadano@email.com", response.correo());
+    }
+
+    /* ==================== RA4: Rol inexistente lanza excepción ==================== */
+
+    @Test
+    void crearUsuarioInterno_rolInexistente_lanzaExcepcion() {
+        RegisterRequest request = new RegisterRequest(
+                "Rol Inventado", "rol@email.com", "pass123", "55667788", "3004445566", "ROLE_SUPERADMIN"
+        );
+
+        when(ciudadanoRepository.existsByCorreo("rol@email.com")).thenReturn(false);
+        when(ciudadanoRepository.existsByDocumento("55667788")).thenReturn(false);
+
+        assertThrows(BadRequestException.class,
+                () -> authService.crearUsuarioInterno(request),
+                "RA4: un rol inexistente debe lanzar excepción");
+    }
+
+    /* ==================== Duplicados entre ciudadanos y asesores ==================== */
+
+    @Test
+    void crearUsuarioInterno_correoExisteEnAsesor_lanzaExcepcion() {
+        RegisterRequest request = new RegisterRequest(
+                "Nombre Duplicado", "asesor@email.com", "pass123", "12345678", "3001234567", "ROLE_RECEPCIONISTA"
+        );
+
+        when(ciudadanoRepository.existsByCorreo("asesor@email.com")).thenReturn(false);
+        when(asesorRepository.existsByCorreo("asesor@email.com")).thenReturn(true);
+
+        assertThrows(BadRequestException.class,
+                () -> authService.crearUsuarioInterno(request),
+                "Un correo ya usado por un asesor debe ser rechazado");
+    }
+
+    @Test
+    void registrar_correoExisteEnAsesor_lanzaExcepcion() {
+        RegisterRequest request = new RegisterRequest(
+                "Nombre Duplicado", "asesor@email.com", "pass123", "12345678", "3001234567", "ROLE_CIUDADANO"
+        );
+
+        when(ciudadanoRepository.existsByCorreo("asesor@email.com")).thenReturn(false);
+        when(asesorRepository.existsByCorreo("asesor@email.com")).thenReturn(true);
+
+        assertThrows(BadRequestException.class,
+                () -> authService.registrar(request),
+                "RA1: un correo ya usado por un asesor debe ser rechazado");
     }
 
     /* ==================== RA6: Usuario no admin no puede registrar asesor ==================== */
