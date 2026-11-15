@@ -239,7 +239,7 @@ export default function AsesorPage() {
               <p className="font-mono text-4xl font-bold tracking-tight text-brand-800" aria-label={`Número de turno ${turno.numeroTurno}`}>
                 {turno.numeroTurno}
               </p>
-              <div aria-live="polite" className="flex items-center gap-2">
+              <div aria-live="polite" role="status" className="flex items-center gap-2" key={estado}>
                 <BadgeEstado estado={turno.estado} />
                 <BadgePrioridad prioritario={turno.prioridad === 'PRIORITARIO'} />
               </div>
