@@ -53,7 +53,7 @@ Formato `{CODIGO_TRAMITE}{P|N}-{NNNNN}` donde:
 
 | Método | Ruta | Roles | Request | Response | Códigos |
 |--------|------|-------|---------|----------|---------|
-| POST | `/admin/usuarios` | ADMINISTRADOR | `{nombre, correo, password, rol, documento, telefono}` | `{id, nombre, correo, rol}` | 201, 400, 403 |
+| POST | `/admin/usuarios` | ADMINISTRADOR | `{nombre, correo, password, documento, telefono, rol}` (rol: interno o CIUDADANO) | `{id, nombre, correo, rol}` | 201, 400, 403 |
 | GET | `/admin/usuarios` | ADMINISTRADOR | — | `[{id, nombre, correo, rol}]` | 200, 403 |
 
 ### Turnos

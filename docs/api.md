@@ -19,7 +19,7 @@ Autenticación: header `X-Usuario-Id` en peticiones protegidas. Esquema didácti
 
 | Método | Ruta | Roles | Request | Response | Códigos |
 |--------|------|-------|---------|----------|---------|
-| POST | `/admin/usuarios` | ADMINISTRADOR | `{nombre, correo, password, documento, telefono, rol}` | `{id, nombre, correo, rol}` | 201, 400, 403 |
+| POST | `/admin/usuarios` | ADMINISTRADOR | `{nombre, correo, password, documento, telefono, rol}` — `rol` puede ser `ROLE_CIUDADANO`, `ROLE_ASESOR`, `ROLE_RECEPCIONISTA`, `ROLE_COORDINADOR` o `ROLE_ADMINISTRADOR` | `{id, nombre, correo, rol}` | 201, 400, 403 |
 
 ---
 

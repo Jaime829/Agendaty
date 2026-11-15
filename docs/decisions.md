@@ -21,8 +21,8 @@ El rol por defecto SIEMPRE es CIUDADANO. El backend ignora cualquier rol enviado
 ## ADR-007: Admin seed (RA3)
 `CommandLineRunner` que crea un administrador automáticamente al arrancar si no existe. Credenciales desde `ADMIN_EMAIL`/`ADMIN_PASSWORD` (variables de entorno o `application.properties`). Solo para desarrollo.
 
-## ADR-008: Gestión de usuarios internos (RA4)
-Solo ADMINISTRADOR puede registrar asesores, recepcionistas, coordinadores y otros administradores mediante `POST /admin/usuarios`. El registro público solo crea ciudadanos.
+## ADR-008: Gestión de usuarios por el administrador (RA4)
+Solo ADMINISTRADOR puede registrar asesores, recepcionistas, coordinadores, otros administradores y también ciudadanos mediante `POST /admin/usuarios`. El registro público solo crea ciudadanos (rol forzado CIUDADANO).
 
 ## ADR-009: RN2 sin tareas programadas
 No hay tareas programadas (`@Scheduled`) para marcar turnos como NO_ATENDIDO. Se usa un endpoint explícito `/turnos/{id}/no-atendido` que llama la recepcionista o el admin.

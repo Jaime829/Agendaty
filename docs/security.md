@@ -32,7 +32,7 @@
 | Marcar no atendido | ❌ | ❌ | ✅ | ❌ | ✅ |
 | Cambiar disponibilidad asesor | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Ver reportes | ❌ | ❌ | ❌ | ✅ | ✅ |
-| Registrar usuarios internos | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Registrar usuarios internos y ciudadanos | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Gestionar ventanillas | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Gestionar tipos de trámite | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Consultar estado de turno propio | ✅ | ❌ | ❌ | ❌ | ❌ |

@@ -44,7 +44,7 @@ frontend/
 | Recepcionista | `/recepcionista` | Generar turno (tipo de trámite, prioridad), lista de cola, cancelar |
 | Asesor | `/asesor` | Llamar siguiente, iniciar/pausar/reanudar/finalizar atención con observaciones y resultado |
 | Coordinador | `/coordinador` | Monitor de cola (polling 5s), carga por asesor, reporte tiempo espera |
-| Administrador | `/administrador` | CRUD de usuarios internos, ventanillas, tipos de trámite |
+| Administrador | `/administrador` | Registrar usuarios (internos y ciudadanos), gestión de ventanillas y tipos de trámite |
 | Reportes | `/reportes` | Tiempo promedio de espera con filtros de fecha |
 
 ## Calidad de UI/UX
