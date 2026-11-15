@@ -133,7 +133,7 @@ export default function CoordinadorPage() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-live="polite" aria-label="Indicadores de cola">
+        <div className="grid animate-rise-in grid-cols-2 gap-3 lg:grid-cols-4" aria-live="polite" aria-label="Indicadores de cola">
           {stats.map(({ etiqueta, valor }) => (
             <KpiCard key={etiqueta} etiqueta={etiqueta} valor={valor} />
           ))}
