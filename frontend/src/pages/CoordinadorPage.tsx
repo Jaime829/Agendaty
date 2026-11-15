@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { turnosService, reportesService } from '@/api';
+import { turnosService, reportesService, asesoresService } from '@/api';
 import {
   BadgeEstado,
   BadgePrioridad,
@@ -7,6 +7,9 @@ import {
   CardHeader,
   Button,
   Alert,
+  PageHeader,
+  KpiCard,
+  DataTable,
   Skeleton,
   EmptyState,
 } from '@/components';
@@ -19,6 +22,7 @@ export default function CoordinadorPage() {
 
   const [turnos, setTurnos] = useState<any[]>([]);
   const [reporte, setReporte] = useState<any>(null);
+  const [asesores, setAsesores] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [cargandoInicial, setCargandoInicial] = useState(true);
   const [ultimaActualizacion, setUltimaActualizacion] = useState<Date | null>(null);
@@ -27,13 +31,15 @@ export default function CoordinadorPage() {
   const cargarTodo = useCallback(async (silencioso = true) => {
     if (!silencioso) setCargandoInicial(true);
     try {
-      const [t, r] = await Promise.all([
+      const [t, r, a] = await Promise.all([
         turnosService.listar(),
         reportesService.tiempoEsperaPromedio(),
+        asesoresService.listar(),
       ]);
       if (!montado.current) return;
       setTurnos(t ?? []);
       setReporte(r);
+      setAsesores(a ?? []);
       setUltimaActualizacion(new Date());
       setError(null);
     } catch (e: any) {
@@ -49,11 +55,12 @@ export default function CoordinadorPage() {
     const cargar = () =>
       // Inline (no llamar a cargarTodo): la regla react-hooks/set-state-in-effect
       // no admite invocar desde el efecto funciones que llaman setState.
-      Promise.all([turnosService.listar(), reportesService.tiempoEsperaPromedio()])
-        .then(([t, r]) => {
+      Promise.all([turnosService.listar(), reportesService.tiempoEsperaPromedio(), asesoresService.listar()])
+        .then(([t, r, a]) => {
           if (!montado.current) return;
           setTurnos(t ?? []);
           setReporte(r);
+          setAsesores(a ?? []);
           setUltimaActualizacion(new Date());
           setError(null);
         })
@@ -77,35 +84,32 @@ export default function CoordinadorPage() {
   const enAtencion = turnos.filter((t) => t.estado === 'EN_ATENCION' || t.estado === 'EN_PAUSA' || t.estado === 'LLAMADO');
   const enPausa = turnos.filter((t) => t.estado === 'EN_PAUSA');
 
+  // Carga por asesor: turnos activos asignados a cada asesor ahora mismo
+  const cargaPorAsesor = asesores.map((a: any) => ({
+    ...a,
+    turnosActivos: turnos.filter(
+      (t: any) => t.asesorId === a.id && ['LLAMADO', 'EN_ATENCION', 'EN_PAUSA'].includes(t.estado)
+    ).length,
+  }));
+
   const stats = [
-    { etiqueta: 'En espera', valor: enEspera.length, tono: 'text-amber-700 bg-amber-50 ring-amber-200' },
-    { etiqueta: 'En atención', valor: enAtencion.length, tono: 'text-indigo-700 bg-indigo-50 ring-indigo-200' },
-    { etiqueta: 'En pausa', valor: enPausa.length, tono: 'text-slate-700 bg-slate-100 ring-slate-200' },
-    {
-      etiqueta: 'Espera promedio',
-      valor: reporte?.valor != null ? `${reporte.valor} min` : '—',
-      tono: 'text-brand-800 bg-brand-50 ring-brand-200',
-    },
+    { etiqueta: 'En espera', valor: enEspera.length },
+    { etiqueta: 'En atención', valor: enAtencion.length },
+    { etiqueta: 'En pausa', valor: enPausa.length },
+    { etiqueta: 'Espera promedio', valor: reporte?.valor != null ? `${reporte.valor} min` : '—' },
   ];
 
   return (
     <div className="page-gutter mx-auto max-w-7xl pt-6">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Monitor de atención</h1>
-          <p className="text-sm text-slate-500">
-            Vista en vivo de la cola{' '}
-            {ultimaActualizacion && (
-              <span className="text-slate-400">
-                · actualizado {ultimaActualizacion.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-              </span>
-            )}
-          </p>
-        </div>
-        <Button variant="secondary" size="sm" onClick={() => cargarTodo(false)} aria-label="Actualizar monitor">
-          Actualizar
-        </Button>
-      </div>
+      <PageHeader
+        titulo="Monitor de atención"
+        descripcion={
+          ultimaActualizacion
+            ? `Vista en vivo · actualizado ${ultimaActualizacion.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`
+            : 'Vista en vivo de la cola'
+        }
+        accion={<Button variant="secondary" size="sm" onClick={() => cargarTodo(true)}>Actualizar</Button>}
+      />
 
       {error && (
         <div className="mb-4">
@@ -120,14 +124,11 @@ export default function CoordinadorPage() {
           ))}
         </div>
       ) : (
-        <dl className="grid grid-cols-2 gap-4 lg:grid-cols-4" aria-live="polite">
-          {stats.map(({ etiqueta, valor, tono }) => (
-            <div key={etiqueta} className={`rounded-xl p-4 ring-1 ${tono}`}>
-              <dt className="text-xs font-semibold uppercase tracking-wide opacity-80">{etiqueta}</dt>
-              <dd className="mt-1 text-3xl font-bold tabular-nums">{valor}</dd>
-            </div>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-live="polite" aria-label="Indicadores de cola">
+          {stats.map(({ etiqueta, valor }) => (
+            <KpiCard key={etiqueta} etiqueta={etiqueta} valor={valor} />
           ))}
-        </dl>
+        </div>
       )}
 
       <Card className="mt-6 p-6">
@@ -144,42 +145,54 @@ export default function CoordinadorPage() {
         ) : turnos.length === 0 ? (
           <EmptyState titulo="Sin turnos hoy" descripcion="Genera un turno desde recepción para verlos aquí." />
         ) : (
-          <div className="-mx-2 overflow-x-auto px-2">
-            <table className="table-data">
-              <thead>
-                <tr>
-                  <th scope="col">Número</th>
-                  <th scope="col">Trámite</th>
-                  <th scope="col">Estado</th>
-                  <th scope="col">Prioridad</th>
-                  <th scope="col">Asesor</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[...turnos]
-                  .sort((a, b) => {
-                    if (a.prioridad !== b.prioridad) return a.prioridad === 'PRIORITARIO' ? -1 : 1;
-                    return String(a.fechaCreacion).localeCompare(String(b.fechaCreacion));
-                  })
-                  .slice(0, 20)
-                  .map((t) => (
-                    <tr key={t.id}>
-                      <td className="font-mono font-semibold text-brand-800">{t.numeroTurno}</td>
-                      <td className="text-slate-600">{t.tipoTramiteNombre ?? '—'}</td>
-                      <td>
-                        <BadgeEstado estado={t.estado} />
-                      </td>
-                      <td>
-                        <BadgePrioridad prioritario={t.prioridad === 'PRIORITARIO'} />
-                      </td>
-                      <td className="text-slate-600">{t.asesorNombre ?? '—'}</td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            columns={[
+              { key: 'numeroTurno', header: 'Número', sortValue: (t: any) => t.numeroTurno },
+              { key: 'tipoTramiteNombre', header: 'Trámite', sortValue: (t: any) => (t.tipoTramiteNombre ?? '').toLowerCase() },
+              { key: 'estado', header: 'Estado', render: (t: any) => <BadgeEstado estado={t.estado} />, sortValue: (t: any) => t.estado },
+              { key: 'prioridad', header: 'Prioridad', render: (t: any) => <BadgePrioridad prioritario={t.prioridad === 'PRIORITARIO'} />, sortValue: (t: any) => (t.prioridad === 'PRIORITARIO' ? 0 : 1) },
+              { key: 'asesorNombre', header: 'Asesor', render: (t: any) => t.asesorNombre ?? '—', sortValue: (t: any) => t.asesorNombre ?? '' },
+            ]}
+            rows={[...turnos]
+              .sort((a: any, b: any) => {
+                if (a.prioridad !== b.prioridad) return a.prioridad === 'PRIORITARIO' ? -1 : 1;
+                return String(a.fechaCreacion).localeCompare(String(b.fechaCreacion));
+              })}
+            rowKey={(t: any) => t.id}
+            searchText={(t: any) => `${t.numeroTurno} ${t.tipoTramiteNombre ?? ''} ${t.asesorNombre ?? ''}`}
+            searchPlaceholder="Buscar en la cola…"
+            pageSize={10}
+            caption="Cola de turnos actual"
+          />
         )}
       </Card>
+
+      {/* Carga por asesor */}
+      {!cargandoInicial && cargaPorAsesor.length > 0 && (
+        <Card className="mt-6 p-6">
+          <CardHeader
+            titulo="Carga por asesor"
+            descripcion="Turnos activos asignados a cada asesor ahora mismo."
+          />
+          <ul className="space-y-2">
+            {cargaPorAsesor.map((a: any) => (
+              <li key={a.id} className="flex items-center justify-between gap-4 rounded-lg border border-slate-100 bg-slate-50 px-4 py-2.5">
+                <span className="text-sm font-medium text-slate-800">{a.nombre}</span>
+                <span className="flex items-center gap-2">
+                  {a.turnosActivos > 0 ? (
+                    <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-indigo-600 px-2 text-xs font-bold tabular-nums text-white">
+                      {a.turnosActivos}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-slate-400">sin turnos activos</span>
+                  )}
+                  <span className={`h-2.5 w-2.5 rounded-full ${a.disponible ? 'bg-green-500' : 'bg-slate-300'}`} aria-hidden="true" />
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
     </div>
   );
 }

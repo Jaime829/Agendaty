@@ -13,6 +13,7 @@ import {
   Skeleton,
   EmptyState,
   ConfirmDialog,
+  PageHeader,
 } from '@/components';
 import { useRolGuard } from '@/hooks/useRolGuard';
 import type { TipoTramite } from '@/types';
@@ -103,10 +104,10 @@ export default function RecepcionistaPage() {
 
   return (
     <div className="page-gutter mx-auto max-w-7xl pt-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Recepción</h1>
-        <p className="text-sm text-slate-500">Registra el trámite del ciudadano y entrega su número de turno.</p>
-      </div>
+      <PageHeader
+        titulo="Recepción"
+        descripcion="Registra el trámite del ciudadano y entrega su número de turno."
+      />
 
       {error && (
         <div className="mb-4">

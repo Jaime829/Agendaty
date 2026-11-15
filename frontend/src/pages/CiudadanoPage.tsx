@@ -8,6 +8,7 @@ import {
   Input,
   Alert,
   EmptyState,
+  PageHeader,
 } from '@/components';
 import { useRolGuard } from '@/hooks/useRolGuard';
 
@@ -46,10 +47,10 @@ export default function CiudadanoPage() {
 
   return (
     <div className="page-gutter mx-auto max-w-3xl pt-8">
-      <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold text-slate-900">Mi turno</h1>
-        <p className="mt-1 text-sm text-slate-500">Ingresa tu número y conoce tu estado en la cola.</p>
-      </div>
+      <PageHeader
+        titulo="Mi turno"
+        descripcion="Ingresa tu número y conoce tu estado en la cola."
+      />
 
       <Card className="mx-auto max-w-md p-6">
         <form

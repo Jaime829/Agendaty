@@ -10,6 +10,7 @@ import {
   Input,
   Alert,
   Skeleton,
+  PageHeader,
 } from '@/components';
 import { useRolGuard } from '@/hooks/useRolGuard';
 
@@ -211,19 +212,19 @@ export default function AsesorPage() {
 
   return (
     <div className="page-gutter mx-auto max-w-7xl pt-6">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Panel de asesor</h1>
-          <p className="text-sm text-slate-500">Llama el siguiente turno y atiéndelo de principio a fin.</p>
-        </div>
-        <p className="hidden text-xs text-slate-400 sm:block" aria-hidden="true">
-          Atajos: <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono">L</kbd> llamar ·{' '}
-          <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono">I</kbd> iniciar ·{' '}
-          <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono">P</kbd> pausar ·{' '}
-          <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono">R</kbd> reanudar ·{' '}
-          <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono">F</kbd> resultado
-        </p>
-      </div>
+      <PageHeader
+        titulo="Panel de asesor"
+        descripcion="Llama al siguiente turno y atiéndelo de principio a fin."
+        accion={
+          <p className="hidden text-xs text-slate-400 sm:block" aria-hidden="true">
+            Atajos: <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono">L</kbd> llamar ·{' '}
+            <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono">I</kbd> iniciar ·{' '}
+            <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono">P</kbd> pausar ·{' '}
+            <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono">R</kbd> reanudar ·{' '}
+            <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono">F</kbd> resultado
+          </p>
+        }
+      />
 
       {errorCarga && (
         <div className="mb-4">

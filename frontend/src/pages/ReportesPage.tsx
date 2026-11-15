@@ -6,6 +6,8 @@ import {
   Button,
   Input,
   Alert,
+  PageHeader,
+  KpiCard,
   Skeleton,
   EmptyState,
 } from '@/components';
@@ -63,10 +65,10 @@ export default function ReportesPage() {
 
   return (
     <div className="page-gutter mx-auto max-w-7xl pt-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Reportes</h1>
-        <p className="text-sm text-slate-500">Tiempos de espera, turnos atendidos y trámites frecuentes.</p>
-      </div>
+      <PageHeader
+        titulo="Reportes"
+        descripcion="Tiempos de espera, turnos atendidos y trámites frecuentes."
+      />
 
       {error && (
         <div className="mb-4">
@@ -105,17 +107,14 @@ export default function ReportesPage() {
       ) : (
         <>
           {/* Indicadores */}
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4" aria-live="polite">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4" aria-live="polite">
             {[
               { etiqueta: 'Espera promedio', valor: promedio?.valor != null ? `${promedio.valor} min` : '—' },
               { etiqueta: 'Atendidos', valor: atendidos?.atendidos ?? '—' },
               { etiqueta: 'No atendidos', valor: atendidos?.no_atendidos ?? atendidos?.noAtendidos ?? '—' },
               { etiqueta: 'Tasa de atención', valor: tasaAtencion != null ? `${tasaAtencion}%` : '—' },
             ].map(({ etiqueta, valor }) => (
-              <div key={etiqueta} className="rounded-xl border border-slate-200 bg-white p-4 shadow-card">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{etiqueta}</p>
-                <p className="mt-1 text-3xl font-bold tabular-nums text-brand-800">{valor}</p>
-              </div>
+              <KpiCard key={etiqueta} etiqueta={etiqueta} valor={valor} />
             ))}
           </div>
 
