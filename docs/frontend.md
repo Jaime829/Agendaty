@@ -1,6 +1,16 @@
 # Documentación del Frontend — Agendaty
 
-Rediseñado el 2026-11-15 (rama `feature/frontend-redesign`). Ver `docs/frontend-audit.md` para la auditoría previa y `docs/decisions.md` (ADR-011 a ADR-015) para las decisiones.
+Rediseñado el 2026-11-15 (rama `feature/dashboard-redesign`, hereda del rediseño global `feature/frontend-redesign`). Ver `docs/frontend-audit.md` (auditoría global) y `docs/dashboard-audit.md` (auditoría del dashboard de Administración) así como `docs/decisions.md` (ADR-011 a ADR-019) para las decisiones.
+
+## Novedades del dashboard de Administración (Fase 3, 2026-11-15)
+
+- **KPIs derivados en cliente** (cero endpoints nuevos): Usuarios totales con desglose (`ciudadanos · internos`), Ciudadanos, Personal interno, Asesores. Tabla de usuarios protagonista: búsqueda por correo/nombre, filtro por rol, orden por columna, paginación 10/página, «Mostrando X–Y de Z». Las acciones de fila se **omiten** porque el contrato REST no soporta editar/desactivar/restablecer contraseña (ver ADR-016).
+- **Tabs Usuarios | Ventanillas | Tipos de trámite** con CRUD completo (crear, editar, eliminar con confirmación destructiva) usando los endpoints existentes (`/ventanillas`, `/tipos-tramite`).
+- **Drawer lateral "Nuevo usuario"** (no más formulario siempre abierto): grid 2 columnas, ayudas bajo campos, mostrar/ocultar contraseña, leyenda «* obligatorio».
+- **Navbar limpia**: menú de usuario desplegable (iniciales, correo, rol, Cerrar sesión) con `aria-expanded`/`aria-controls`/`aria-haspopup`, Escape y click fuera; sin botón «Salir» suelto.
+- **Componentes compartidos nuevos** (`src/components/`): `PageHeader`, `KpiCard`, `DataTable` (genérica con búsqueda/filtro/orden/paginación y caption), `Drawer` (panel lateral/móvil), `RolBadge` (color + texto por rol).
+- **Coordinador**: monitor con PageHeader + KPIs `KpiCard`, cola viva con DataTable (búsqueda + paginación) y sección «Carga por asesor» (se oculta si `GET /asesores` falla — ver nota de backend en ADR-019).
+- **Asesor / Recepción / Ciudadano / Reportes**: encabezados unificados con `PageHeader`; Reportes con `KpiCard`.
 
 ## Stack
 

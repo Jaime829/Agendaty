@@ -49,3 +49,18 @@ Se decidió no implementar dark mode en la Fase 2–7 del rediseño; los tokens 
 
 ## ADR-015: Corrección documental del contrato de reportes (C4)
 `docs/api.md` documenta `tiempo-espera-promedio` como `{promedioMinutos, cantidad}`, pero el backend implementa (y el frontend consume) `{metrica, valor, cantidad_atenciones, fecha_desde, fecha_hasta}`. Se corrigen los docs para reflejar la implementación real; no se cambia ni el backend ni el contrato de API.
+
+## ADR-016: Dashboard Admin — alcance mínimo funcional por contrato (Fase 3)
+El contrato REST expone únicamente: `GET /admin/usuarios` (listar) y `POST /admin/usuarios` (crear). No hay `PATCH/DELETE /admin/usuarios`, ni cambio de contraseña, ni activar/desactivar. Por tanto, la tabla de usuarios del nuevo dashboard **no muestra acciones por fila** (cero botones hacia endpoints inexistentes). Las gestiones que sí existen en el contrato (`GET/POST /ventanillas`, `GET/POST/PUT/DELETE /tipos-tramite`) se implementan completas como pestañas del Admin: Usuarios · Ventanillas · Tipos de trámite. Quedan **prohibidas** las acciones de fila en UIs hasta que el backend las soporte.
+
+## ADR-017: Dirección e identidad del dashboard (Fase 2)
+GOV.UK institucional: claro, denso y directo; una tarea por pantalla; formularios con etiquetas siempre visibles; errores en español llano; tags de estado con punto + texto (nunca solo color); tablas con `scope`, hover sutil y paginación 10/página. Marca azul `#175b9c` intacta; sin modo oscuro esta iteración; densidad compacta. Si skills o referencias se contradicen, prevalece: accesibilidad > claridad de UX > consistencia > estética > animación (acuerdo del autor).
+
+## ADR-018: KPIs de la fila superior — lo mínimo pedido vs lo posible
+El autor pidió únicamente **Usuarios totales con desglose por rol** como KPI del Admin (único multi-select marcado). Se implementan 4 tarjetas derivadas del mismo payload (`GET /admin/usuarios`): Usuarios totales · Personal interno (ASESOR+RECEPCIONISTA+COORDINADOR+ADMINISTRADOR) · Ciudadanos · Asesores. KPIs adicionales operables pero NO pedidos (asesores disponibles en vivo, ventanillas ocupadas, turnos de hoy, trámites activos) están listos en `GET /asesores`, `GET /ventanillas`, `GET /turnos`, `GET /tipos-tramite` respectivamente y se añaden en una iteración posterior si el autor los quiere.
+
+## ADR-019: Degradación elegante ante GET /asesores roto (Fase 4-6)
+`GET /asesores` lanza `NullPointerException` en el backend (`AsesorServiceImp`: `asesor.getVentanillaActual().getNumero()` sin comprobación de nulo cuando el asesor no tiene ventanilla asignada). El frontend lo aísla en un efecto separado: si falla, la sección «Carga por asesor» simplemente no se renderiza y el monitor funciona con normalidad (KPIs y cola). **No se modifica el backend** por mandato del autor; se recomienda la corrección de una línea en el servicio: devolver `numeroVentanilla: null` o ignorarlo cuando `getVentanillaActual() == null`.
+
+## ADR-020: Acciones por fila en tablas — solo si el contrato las soporta
+En formularios tipo ABM para el Admin, solo se muestran acciones respaldadas por el contrato REST (crear/listar en usuarios internos; CRUD completo en ventanillas y tipos de trámite). En la tabla de usuarios NO hay columna de acciones; los errores de negocio se surfacean inline en el drawer. La fila de KPI entra con `animate-rise-in` (220 ms, solo transform/opacity, desactivada con `prefers-reduced-motion`).

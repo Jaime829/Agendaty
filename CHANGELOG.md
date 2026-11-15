@@ -1,5 +1,29 @@
 # Changelog — Agendaty
 
+## [1.2.0] — Dashboard de Administración rediseñado (2026-11-15)
+
+### 🆕 Nuevas funcionalidades
+
+- **Dashboard de Administración real**: KPIs (usuarios totales con desglose, ciudadanos, internos, asesores), tabla de usuarios con búsqueda/filtro por rol/orden/paginación, tabs Usuarios · Ventanillas · Tipos de trámite.
+- **Gestión completa de ventanillas** (crear, editar, eliminar) y **tipos de trámite** (crear, editar, eliminar con confirmación): nunca antes existieron en la UI.
+- **Nuevo usuario en drawer lateral** en vez de formulario siempre abierto; formulario 2 columnas con ayudas y contraseña visible opcional.
+- **Componentes compartidos** (`PageHeader`, `KpiCard`, `DataTable` genérica, `Drawer`, `RolBadge`) reutilizados también por Coordinador (monitor + KPIs + carga por asesor), Asesor, Recepción, Ciudadano y Reportes.
+- **Navbar limpia**: menú de usuario desplegable (iniciales, correo, rol, Cerrar sesión) con teclado/click fuera y `aria-*`; se eliminó la fila de botones «Módulos» duplicados.
+
+### 🐛 Correcciones
+
+- **Monitor de coordinador resiliente**: si `GET /asesores` falla (el backend lanza NPE cuando un asesor no tiene ventanilla), el panel sigue funcionando y oculta solo «Carga por asesor».
+- **Form de alta alineado al backend**: documento y teléfono con patrón `\d`; rol como menú accesible con placeholders claros.
+- Sin botones hacia verbos REST inexistentes (PATCH/DELETE de usuarios): las acciones de fila se omiten por contrato.
+- Mensajes de error del monitor en español llano (nada de `NullPointerException` en pantalla).
+
+### 🔧 Mejoras
+
+- Entrada sutil de KPIs (`animate-rise-in`, solo transform/opacity, respeta `prefers-reduced-motion`).
+- `npm run build` OK; `npm run lint` 0 warnings; `npx tsc --noEmit` 0 errores; tests 18/18 verdes.
+
+---
+
 ## [1.1.0] — Rediseño del frontend y ampliación de gestión de usuarios (2026-11-15)
 
 ### 🆕 Nuevas funcionalidades
