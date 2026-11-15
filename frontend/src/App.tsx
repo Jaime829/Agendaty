@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
 import {
   BrowserRouter,
   Routes,
   Route,
 } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import { AuthProvider } from '@/context/AuthContext';
 import { Navbar } from '@/components/Navbar';
 import LandingPage from '@/pages/LandingPage';
@@ -18,20 +18,15 @@ import ReportesPage from '@/pages/ReportesPage';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 
 export default function App() {
-  const [inicializado, setInicializado] = useState(false);
-
-  useEffect(() => {
-    setInicializado(true);
-  }, []);
-
-  if (!inicializado) return null;
-
   return (
     <AuthProvider>
       <BrowserRouter>
-        <div className="min-h-screen bg-slate-50">
+        <a href="#contenido" className="skip-link">
+          Saltar al contenido principal
+        </a>
+        <div className="min-h-screen bg-surface">
           <Navbar />
-          <main className="pb-8">
+          <main id="contenido" className="pb-8">
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
@@ -87,6 +82,7 @@ export default function App() {
             </Routes>
           </main>
         </div>
+        <Toaster position="top-center" richColors closeButton />
       </BrowserRouter>
     </AuthProvider>
   );

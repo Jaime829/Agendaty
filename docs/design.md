@@ -104,7 +104,7 @@ Formato `{CODIGO_TRAMITE}{P|N}-{NNNNN}` donde:
 
 | Método | Ruta | Roles | Request | Response | Códigos |
 |--------|------|-------|---------|----------|---------|
-| GET | `/reportes/tiempo-espera-promedio` | COORDINADOR, ADMINISTRADOR | `fechaDesde, fechaHasta` (query) | `{promedioMinutos, cantidad}` | 200, 403 |
+| GET | `/reportes/tiempo-espera-promedio` | COORDINADOR, ADMINISTRADOR | `fechaDesde, fechaHasta` (query, opcional) | `{metrica, valor, cantidad_atenciones, fecha_desde, fecha_hasta}` | 200, 403 |
 | GET | `/reportes/turnos-atendidos` | COORDINADOR, ADMINISTRADOR | `fechaDesde, fechaHasta` (query) | `{atendidos, noAtendidos, total}` | 200, 403 |
 | GET | `/reportes/tramites-frecuentes` | COORDINADOR, ADMINISTRADOR | `fechaDesde, fechaHasta` (query) | `[{tipoTramite, cantidad}]` | 200, 403 |
 

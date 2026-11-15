@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthContext } from '@/context/AuthContext';
 import { getRouteByRol } from '@/utils/roleRoutes';
+import { Loading } from '@/components/Loading';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -11,7 +12,7 @@ export function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
   const { user, loading, isAuthenticated, tieneAlgunaRol } = useAuthContext();
   const location = useLocation();
 
-  if (loading) return null;
+  if (loading) return <Loading etiqueta="Cargando sesión…" />;
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;

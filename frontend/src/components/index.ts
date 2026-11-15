@@ -1,8 +1,13 @@
 export { Button } from './Button';
 export { Input } from './Input';
 export { Select } from './Select';
-export { BadgeEstado } from './BadgeEstado';
+export { BadgeEstado, BadgePrioridad } from './BadgeEstado';
+export { Card, CardHeader } from './Card';
 export { Loading } from './Loading';
+export { Skeleton } from './Skeleton';
 export { EmptyState } from './EmptyState';
+export { ErrorState } from './ErrorState';
 export { Alert } from './Alert';
+export { Modal } from './Modal';
+export { ConfirmDialog } from './ConfirmDialog';
 export { Navbar } from './Navbar';

@@ -1,5 +1,3 @@
-import { ValidationErrors } from '@/components/ValidationErrors';
-
 interface AlertProps {
   tipo: 'error' | 'success' | 'warning';
   mensaje: string;
@@ -7,31 +5,47 @@ interface AlertProps {
   onCerrar?: () => void;
 }
 
+const estilos = {
+  error: { caja: 'border-red-200 bg-red-50 text-red-800', icono: '⚠', rol: 'alert' as const },
+  success: { caja: 'border-green-200 bg-green-50 text-green-800', icono: '✓', rol: 'status' as const },
+  warning: { caja: 'border-amber-200 bg-amber-50 text-amber-800', icono: '!', rol: 'alert' as const },
+};
+
 export function Alert({ tipo, mensaje, fieldErrors, onCerrar }: AlertProps) {
-  const colores: Record<string, string> = {
-    error: 'bg-red-50 border-red-200 text-red-800',
-    success: 'bg-green-50 border-green-200 text-green-800',
-    warning: 'bg-amber-50 border-amber-200 text-amber-800',
-  };
+  const { caja, icono, rol } = estilos[tipo];
+  const errores = fieldErrors ? Object.entries(fieldErrors) : [];
+  const hayErroresDeCampo = errores.length > 0;
 
   return (
-    <div className={`mb-4 rounded-md border p-4 flex items-start gap-3 ${colores[tipo]}`}>
-      <span className="flex-shrink-0 mt-0.5">{tipo === 'error' ? '⚠' : tipo === 'success' ? '✓' : '!'}</span>
-      <div className="flex-1">
-        {tipo === 'error' && fieldErrors && Object.keys(fieldErrors).length > 0 ? (
-          <ValidationErrors fieldErrors={fieldErrors} onCerrar={onCerrar} />
-        ) : (
-          <>
+    <div role={rol} className={`rounded-md border p-4 ${caja}`}>
+      <div className="flex items-start gap-3">
+        <span className="flex-shrink-0 mt-0.5" aria-hidden="true">
+          {icono}
+        </span>
+        <div className="min-w-0 flex-1">
+          {hayErroresDeCampo ? (
+            <>
+              <p className="text-sm font-semibold">Errores de validación:</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+                {errores.map(([campo, detalle]) => (
+                  <li key={campo}>
+                    <span className="font-medium">{campo}</span>: {detalle}
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
             <p className="text-sm">{mensaje}</p>
-            {onCerrar && (
-              <button
-                onClick={onCerrar}
-                className="ml-auto mt-0.5 text-sm hover:underline"
-              >
-                Cerrar
-              </button>
-            )}
-          </>
+          )}
+        </div>
+        {onCerrar && (
+          <button
+            onClick={onCerrar}
+            aria-label="Cerrar mensaje"
+            className="ml-auto flex-shrink-0 rounded px-2 text-lg leading-none opacity-70 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current"
+          >
+            ×
+          </button>
         )}
       </div>
     </div>
