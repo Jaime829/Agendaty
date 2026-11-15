@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Building2 } from 'lucide-react';
 import { authService } from '@/api/auth';
 import { useAuthContext } from '@/context/AuthContext';
@@ -8,15 +8,19 @@ import { Input } from '@/components/Input';
 import { Alert } from '@/components/Alert';
 import { Card } from '@/components/Card';
 import type { LoginRequest } from '@/types';
-import { getRouteByRol } from '@/utils/roleRoutes';
+import { getHomeByRole } from '@/utils/roleRoutes';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuthContext();
+  const { login, user, isAuthenticated } = useAuthContext();
   const [form, setForm] = useState<LoginRequest>({ correo: '', password: '' });
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [enviando, setEnviando] = useState(false);
+
+  if (isAuthenticated) {
+    return <Navigate to={getHomeByRole(user?.rol)} replace />;
+  }
 
   const cerrarError = () => {
     setError(null);
@@ -40,7 +44,7 @@ export default function LoginPage() {
         username: data.correo,
         rol: data.rol,
       });
-      navigate(getRouteByRol(data.rol), { replace: true });
+      navigate(getHomeByRole(data.rol), { replace: true });
     } catch (err: any) {
       setError(err.message || 'Credenciales inválidas');
       setFieldErrors(err.fieldErrors || {});
@@ -94,3 +98,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

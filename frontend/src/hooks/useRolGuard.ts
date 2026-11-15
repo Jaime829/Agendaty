@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '@/context/AuthContext';
-import { getRouteByRol } from '@/utils/roleRoutes';
+import { getHomeByRole } from '@/utils/roleRoutes';
 
 /**
  * Redirige al usuario si no está autenticado o no tiene uno de los roles permitidos.
@@ -21,9 +21,10 @@ export function useRolGuard(rolesPermitidos: string[]) {
       return;
     }
     if (!tieneAlgunaRol(roles)) {
-      navigate(getRouteByRol(user.rol), { replace: true });
+      navigate(getHomeByRole(user.rol), { replace: true });
     }
   }, [loading, user, tieneAlgunaRol, navigate, key]);
 
   return { esPermitido: !!user && tieneAlgunaRol(rolesPermitidos), user, loading };
 }
+

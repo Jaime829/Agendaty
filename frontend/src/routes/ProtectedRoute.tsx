@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthContext } from '@/context/AuthContext';
-import { getRouteByRol } from '@/utils/roleRoutes';
+import { getHomeByRole } from '@/utils/roleRoutes';
 import { Loading } from '@/components/Loading';
 
 interface ProtectedRouteProps {
@@ -20,8 +20,9 @@ export function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
 
   if (roles && !tieneAlgunaRol(roles)) {
     // Redirigir al dashboard correspondiente del usuario en lugar de a la landing
-    return <Navigate to={getRouteByRol(user?.rol)} replace />;
+    return <Navigate to={getHomeByRole(user?.rol)} replace />;
   }
 
   return <>{children}</>;
 }
+

@@ -1,16 +1,19 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Building2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { authService } from '@/api/auth';
+import { useAuthContext } from '@/context/AuthContext';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { Alert } from '@/components/Alert';
 import { Card } from '@/components/Card';
 import type { RegisterRequest } from '@/types';
+import { getHomeByRole } from '@/utils/roleRoutes';
 
 export default function RegistroPage() {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuthContext();
   const [form, setForm] = useState<RegisterRequest>({
     nombre: '',
     correo: '',
@@ -21,6 +24,10 @@ export default function RegistroPage() {
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [enviando, setEnviando] = useState(false);
+
+  if (isAuthenticated) {
+    return <Navigate to={getHomeByRole(user?.rol)} replace />;
+  }
 
   const cerrarError = () => {
     setError(null);

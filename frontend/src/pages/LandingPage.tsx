@@ -5,6 +5,9 @@ import {
   BellRing,
   ArrowRight,
 } from 'lucide-react';
+import { PublicNav } from '@/components/PublicNav';
+import { useAuthContext } from '@/context/AuthContext';
+import { getHomeByRole } from '@/utils/roleRoutes';
 
 const roles = [
   {
@@ -53,28 +56,12 @@ const faqs = [
 ];
 
 export default function LandingPage() {
+  const { user, loading, isAuthenticated } = useAuthContext();
+  const panelDeMiRol = getHomeByRole(user?.rol);
+
   return (
     <div className="min-h-screen">
-      {/* Barra pública */}
-      <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
-        <div className="page-gutter mx-auto flex h-16 max-w-7xl items-center justify-between">
-          <Link to="/" className="flex items-center gap-2" aria-label="Agendaty — inicio">
-            <Building2 className="h-6 w-6 text-brand-600" aria-hidden="true" />
-            <span className="text-lg font-bold tracking-tight text-slate-900">Agendaty</span>
-          </Link>
-          <nav className="flex items-center gap-2 sm:gap-4" aria-label="Navegación pública">
-            <Link to="/login" className="rounded-md px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
-              Iniciar sesión
-            </Link>
-            <Link
-              to="/registro"
-              className="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-            >
-              Crear cuenta
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <PublicNav />
 
       {/* Hero */}
       <section className="overflow-hidden bg-gradient-to-b from-brand-50 via-surface to-surface">
@@ -92,18 +79,39 @@ export default function LandingPage() {
               atención. Los turnos prioritarios se atienden primero.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link
-                to="/registro"
-                className="inline-flex h-[52px] items-center justify-center gap-2 rounded-md bg-brand-600 px-6 text-base font-semibold text-white transition-colors hover:bg-brand-700"
-              >
-                Crear mi cuenta <ArrowRight className="h-5 w-5" aria-hidden="true" />
-              </Link>
-              <Link
-                to="/login"
-                className="inline-flex h-[52px] items-center justify-center rounded-md border border-slate-300 bg-white px-6 text-base font-semibold text-slate-800 transition-colors hover:bg-slate-50"
-              >
-                Iniciar sesión
-              </Link>
+              {loading ? (
+                <div className="h-[52px] w-56 rounded-md bg-slate-200/70" aria-hidden="true" />
+              ) : isAuthenticated ? (
+                <>
+                  <Link
+                    to={panelDeMiRol}
+                    className="inline-flex h-[52px] items-center justify-center gap-2 rounded-md bg-brand-600 px-6 text-base font-semibold text-white transition-colors hover:bg-brand-700"
+                  >
+                    Ir a mi panel <ArrowRight className="h-5 w-5" aria-hidden="true" />
+                  </Link>
+                  <a
+                    href="#como-funciona"
+                    className="inline-flex h-[52px] items-center justify-center rounded-md border border-slate-300 bg-white px-6 text-base font-semibold text-slate-800 transition-colors hover:bg-slate-50"
+                  >
+                    Ver cómo funciona
+                  </a>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/registro"
+                    className="inline-flex h-[52px] items-center justify-center gap-2 rounded-md bg-brand-600 px-6 text-base font-semibold text-white transition-colors hover:bg-brand-700"
+                  >
+                    Crear mi cuenta <ArrowRight className="h-5 w-5" aria-hidden="true" />
+                  </Link>
+                  <Link
+                    to="/login"
+                    className="inline-flex h-[52px] items-center justify-center rounded-md border border-slate-300 bg-white px-6 text-base font-semibold text-slate-800 transition-colors hover:bg-slate-50"
+                  >
+                    Iniciar sesión
+                  </Link>
+                </>
+              )}
             </div>
             <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600">
               {['Número único por turno', 'Tu turno en pantalla en vivo', 'Los prioritarios atienden primero'].map((t) => (
@@ -238,12 +246,23 @@ export default function LandingPage() {
           <p className="mx-auto mt-3 max-w-xl text-brand-100">
             Crea tu cuenta hoy. Cuando vayas por tu trámite, llevarás un número en la mano y sabrás cuándo te toca.
           </p>
-          <Link
-            to="/registro"
-            className="mt-8 inline-flex items-center gap-2 rounded-md bg-white px-8 py-4 text-base font-semibold text-brand-800 transition-colors hover:bg-brand-50"
-          >
-            Crear mi cuenta <ArrowRight className="h-5 w-5" aria-hidden="true" />
-          </Link>
+          {loading ? (
+            <div className="mx-auto mt-8 h-[52px] w-48 rounded-md bg-brand-100/60" aria-hidden="true" />
+          ) : isAuthenticated ? (
+            <Link
+              to={panelDeMiRol}
+              className="mt-8 inline-flex items-center gap-2 rounded-md bg-white px-8 py-4 text-base font-semibold text-brand-800 transition-colors hover:bg-brand-50"
+            >
+              Ir a mi panel <ArrowRight className="h-5 w-5" aria-hidden="true" />
+            </Link>
+          ) : (
+            <Link
+              to="/registro"
+              className="mt-8 inline-flex items-center gap-2 rounded-md bg-white px-8 py-4 text-base font-semibold text-brand-800 transition-colors hover:bg-brand-50"
+            >
+              Crear mi cuenta <ArrowRight className="h-5 w-5" aria-hidden="true" />
+            </Link>
+          )}
         </div>
       </section>
 

@@ -20,11 +20,16 @@ vi.mock('@/api/auth', () => ({
   },
 }));
 
+const ctxMock = vi.hoisted(() => ({
+  user: null as any,
+  isAuthenticated: false,
+}));
+
 vi.mock('@/context/AuthContext', () => ({
   useAuthContext: () => ({
-    user: null,
+    user: ctxMock.user,
     loading: false,
-    isAuthenticated: false,
+    isAuthenticated: ctxMock.isAuthenticated,
     login: vi.fn(),
     logout: vi.fn(),
     tieneRol: () => false,
@@ -38,13 +43,25 @@ function renderRegistro() {
       <Routes>
         <Route path="/registro" element={<RegistroPage />} />
         <Route path="/login" element={<div>PANTALLA LOGIN</div>} />
+        <Route path="/administrador" element={<div>PANEL ADMIN</div>} />
       </Routes>
     </MemoryRouter>
   );
 }
 
 describe('RegistroPage', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    ctxMock.user = null;
+    ctxMock.isAuthenticated = false;
+  });
+
+  it('redirige al panel del rol cuando ya hay sesión activa', () => {
+    ctxMock.user = { usuarioId: 1, username: 'admin@turnos.local', rol: 'ROLE_ADMINISTRADOR' };
+    ctxMock.isAuthenticated = true;
+    renderRegistro();
+    expect(screen.getByText('PANEL ADMIN')).toBeInTheDocument();
+  });
 
   it('renderiza todos los campos del formulario', () => {
     renderRegistro();

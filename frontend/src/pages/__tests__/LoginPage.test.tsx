@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import LoginPage from '@/pages/LoginPage';
 
 const authMock = vi.hoisted(() => ({
@@ -11,6 +11,8 @@ const authMock = vi.hoisted(() => ({
 
 const ctxMock = vi.hoisted(() => ({
   login: vi.fn(),
+  user: null as any,
+  isAuthenticated: false,
 }));
 
 vi.mock('@/api/auth', () => ({
@@ -27,9 +29,9 @@ vi.mock('@/api/auth', () => ({
 
 vi.mock('@/context/AuthContext', () => ({
   useAuthContext: () => ({
-    user: null,
+    user: ctxMock.user,
     loading: false,
-    isAuthenticated: false,
+    isAuthenticated: ctxMock.isAuthenticated,
     login: ctxMock.login,
     logout: vi.fn(),
     tieneRol: () => false,
@@ -40,7 +42,11 @@ vi.mock('@/context/AuthContext', () => ({
 function renderLogin() {
   return render(
     <MemoryRouter initialEntries={['/login']}>
-      <LoginPage />
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/administrador" element={<div>PANEL ADMIN</div>} />
+        <Route path="/ciudadano" element={<div>PANEL CIUDADANO</div>} />
+      </Routes>
     </MemoryRouter>
   );
 }
@@ -48,6 +54,8 @@ function renderLogin() {
 describe('LoginPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    ctxMock.user = null;
+    ctxMock.isAuthenticated = false;
   });
 
   it('renderiza los campos correo y contraseña y el botón de envío', () => {
@@ -55,6 +63,13 @@ describe('LoginPage', () => {
     expect(screen.getByLabelText('Correo electrónico')).toBeInTheDocument();
     expect(screen.getByLabelText('Contraseña')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /iniciar sesión/i })).toBeInTheDocument();
+  });
+
+  it('redirige al panel del rol cuando ya hay sesión activa', () => {
+    ctxMock.user = { usuarioId: 3, username: 'juan@email.com', rol: 'ROLE_CIUDADANO' };
+    ctxMock.isAuthenticated = true;
+    renderLogin();
+    expect(screen.getByText('PANEL CIUDADANO')).toBeInTheDocument();
   });
 
   it('muestra el error cuando las credenciales son inválidas', async () => {

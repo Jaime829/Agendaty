@@ -21,8 +21,28 @@ export const authService = {
   getToken: () => localStorage.getItem('token'),
   removeToken: () => localStorage.removeItem('token'),
   getUser: () => {
-    const raw = localStorage.getItem('user');
-    return raw ? JSON.parse(raw) : null;
+    // Sesión corrupta o inválida => "sin sesión", nunca un crash
+    try {
+      const raw = localStorage.getItem('user');
+      if (!raw) return null;
+      const u = JSON.parse(raw);
+      if (!u || typeof u !== 'object') {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        return null;
+      }
+      const id = u.usuarioId ?? u.id;
+      if (!id || typeof u.rol !== 'string' || !u.rol) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        return null;
+      }
+      return u;
+    } catch {
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      return null;
+    }
   },
   setUser: (user: any) => localStorage.setItem('user', JSON.stringify(user)),
   logout: () => {

@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
 import { authService } from '@/api/auth';
 import type { AuthUser } from '@/types';
 
@@ -12,14 +13,33 @@ const AuthContext = createContext<{
   tieneAlgunaRol: (roles: string[]) => boolean;
 } | null>(null);
 
+// Lectura síncrona y tolerante a datos corruptos (una sola fuente de verdad)
+const leerSesionInicial = (): AuthUser | null => {
+  const storedUser = authService.getUser();
+  const token = authService.getToken();
+  return storedUser && token ? storedUser : null;
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // La sesión se restaura de forma síncrona desde localStorage (sin parpadeos ni efecto extra)
-  const [user, setUser] = useState<AuthUser | null>(() => {
-    const storedUser = authService.getUser();
-    const token = authService.getToken();
-    return storedUser && token ? storedUser : null;
-  });
+  const [user, setUser] = useState<AuthUser | null>(leerSesionInicial);
   const [loading] = useState(false);
+
+  // Sincroniza la sesión entre pestañas del mismo origen:
+  // 'storage' cubre escrituras desde otra pestaña, 'focus' cubre re-leer al volver a la pestaña.
+  useEffect(() => {
+    const refrescar = () => setUser(leerSesionInicial());
+    const onKey = (key: string | null) => {
+      if (key === null || key === 'user' || key === 'token') refrescar();
+    };
+    const onStorage = (e: StorageEvent) => onKey(e.key);
+    const onFocus = () => refrescar();
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, []);
 
   const login = useCallback((userData: AuthUser) => {
     authService.setToken(userData.token);
@@ -30,6 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(() => {
     authService.logout();
     setUser(null);
+    toast.success('Sesión cerrada');
   }, []);
 
   const isAuthenticated = !!user;
