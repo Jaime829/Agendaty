@@ -1,187 +1,221 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
 import { turnosService, tiposTramiteService } from '@/api';
-import { BadgeEstado } from '@/components/BadgeEstado';
-import { Button } from '@/components/Button';
-import { Input } from '@/components/Input';
-import { Select } from '@/components/Select';
-import { Alert } from '@/components/Alert';
-import { Loading, EmptyState } from '@/components';
-import { useAuthContext } from '@/context/AuthContext';
+import {
+  BadgeEstado,
+  BadgePrioridad,
+  Card,
+  CardHeader,
+  Button,
+  Input,
+  Select,
+  Alert,
+  Skeleton,
+  EmptyState,
+  ConfirmDialog,
+} from '@/components';
+import { useRolGuard } from '@/hooks/useRolGuard';
 import type { TipoTramite } from '@/types';
-import { getRouteByRol } from '@/utils/roleRoutes';
 
 export default function RecepcionistaPage() {
-  const { user, tieneRol } = useAuthContext();
-  const navigate = useNavigate();
+  const { esPermitido, user } = useRolGuard(['ROLE_RECEPCIONISTA', 'ROLE_ADMINISTRADOR']);
+
   const [tipos, setTipos] = useState<TipoTramite[]>([]);
   const [turnos, setTurnos] = useState<any[]>([]);
-  const [form, setForm] = useState({ ciudadanoId: '', tipoTramiteId: '', prioritario: false });
+  const [form, setForm] = useState({ ciudadanoId: '', tipoTramiteId: '' });
   const [prioritario, setPrioritario] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(false);
+  const [generando, setGenerando] = useState(false);
+  const [cargandoTurnos, setCargandoTurnos] = useState(true);
+  const [turnoACancelar, setTurnoACancelar] = useState<any>(null);
+  const [cancelando, setCancelando] = useState(false);
 
-  const cerrarError = () => {
-    setError(null);
-    setFieldErrors({});
-  };
-
-  useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    if (!tieneRol('ROLE_RECEPCIONISTA') && !tieneRol('ROLE_ADMINISTRADOR')) {
-      navigate(getRouteByRol(user.rol));
-      return;
-    }
-    cargarTipos();
-    cargarTurnos();
-  }, [tieneRol, navigate, user]);
-
-  const cargarTipos = async () => {
-    try {
-      const data = await tiposTramiteService.listar();
-      setTipos(data);
-    } catch (e: any) {
-      setError(e.message || 'Error cargando trámites');
-    }
-  };
-
-  const cargarTurnos = async () => {
-    setLoading(true);
+  const cargarTurnos = useCallback(async () => {
+    setCargandoTurnos(true);
     try {
       const data = await turnosService.listar();
-      setTurnos(data);
+      setTurnos(data ?? []);
     } catch (e: any) {
-      setError(e.message || 'Error cargando turnos');
+      setError(e.message || 'No se pudo cargar la cola de turnos');
     } finally {
-      setLoading(false);
+      setCargandoTurnos(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    tiposTramiteService
+      .listar()
+      .then(setTipos)
+      .catch((e: any) => setError(e.message || 'No se pudo cargar los tipos de trámite'));
+    cargarTurnos();
+  }, [cargarTurnos]);
 
   const generarTurno = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
     setError(null);
-    setSuccess(null);
-    setLoading(true);
+    setFieldErrors({});
+    setGenerando(true);
     try {
-      await turnosService.generar({
-        usuarioId: user?.usuarioId ?? 0,
+      const creado = await turnosService.generar({
+        usuarioId: user.usuarioId,
         turno: {
           ciudadanoId: Number(form.ciudadanoId),
           tipoTramiteId: Number(form.tipoTramiteId),
           prioritario,
         },
       });
-      setSuccess('Turno generado correctamente');
-      setForm({ ciudadanoId: '', tipoTramiteId: '', prioritario: false });
+      toast.success(`Turno ${creado.numeroTurno ?? ''} generado`);
+      setForm({ ciudadanoId: '', tipoTramiteId: '' });
       setPrioritario(false);
       cargarTurnos();
     } catch (e: any) {
-      setError(e.message || 'Error generando turno');
+      setError(e.message || 'No se pudo generar el turno');
       setFieldErrors(e.fieldErrors || {});
     } finally {
-      setLoading(false);
+      setGenerando(false);
     }
   };
 
-  const cancelar = async (id: number) => {
-    if (!window.confirm('¿Confirma cancelar este turno?')) return;
+  const confirmarCancelacion = async () => {
+    if (!turnoACancelar || !user) return;
+    setCancelando(true);
     try {
-      await turnosService.cancelar(id, Number(user?.usuarioId ?? 0));
+      await turnosService.cancelar(turnoACancelar.id, Number(user.usuarioId));
+      toast.success(`Turno ${turnoACancelar.numeroTurno} cancelado`);
+      setTurnoACancelar(null);
       cargarTurnos();
     } catch (e: any) {
-      setError(e.message || 'Error cancelando turno');
+      setError(e.message || 'No se pudo cancelar el turno');
+    } finally {
+      setCancelando(false);
     }
   };
 
+  if (!esPermitido) return null;
+
+  const enEspera = turnos.filter((t) => t.estado === 'EN_ESPERA');
+  const enAtencion = turnos.filter((t) => t.estado === 'EN_ATENCION' || t.estado === 'EN_PAUSA' || t.estado === 'LLAMADO');
+
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Recepcionista</h1>
-        <div className="flex items-center gap-3">
-          {success && <Alert tipo="success" mensaje={success} onCerrar={() => setSuccess(null)} />}
-          {error ? (
-            <Alert tipo="error" mensaje={error} fieldErrors={fieldErrors} onCerrar={cerrarError} />
-          ) : null}
-        </div>
+    <div className="page-gutter mx-auto max-w-7xl pt-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-slate-900">Recepción</h1>
+        <p className="text-sm text-slate-500">Registra el trámite del ciudadano y entrega su número de turno.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {error && (
+        <div className="mb-4">
+          <Alert tipo="error" mensaje={error} fieldErrors={fieldErrors} onCerrar={() => { setError(null); setFieldErrors({}); }} />
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Generar turno */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <h2 className="text-lg font-bold mb-4">Generar turno (CA1-CA4)</h2>
-          <form onSubmit={generarTurno} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="p-6 lg:col-span-2">
+          <CardHeader
+            titulo="Generar turno"
+            descripcion="Selecciona el tipo de trámite y la prioridad."
+          />
+          <form onSubmit={generarTurno} className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Input
-              label="ID Ciudadano"
-              placeholder="Ej. 1"
+              label="ID del ciudadano *"
+              placeholder="Ej. 5"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={form.ciudadanoId}
               onChange={(e) => setForm({ ...form, ciudadanoId: e.target.value })}
               required
             />
             <Select
-              label="Tipo de trámite"
-              options={tipos.map((t) => ({ value: String(t.id), label: `${t.codigo} - ${t.nombre}` }))}
+              label="Tipo de trámite *"
+              options={tipos.map((t) => ({ value: String(t.id), label: `${t.codigo} — ${t.nombre}` }))}
               value={form.tipoTramiteId}
               onChange={(e) => setForm({ ...form, tipoTramiteId: e.target.value })}
               required
             />
-            <div className="flex items-end">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={prioritario}
-                  onChange={(e) => setPrioritario(e.target.checked)}
-                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                Prioritario
-              </label>
-            </div>
-            <Button type="submit" className="col-span-full md:col-span-1" loading={loading}>
+            <fieldset className="md:col-span-2">
+              <legend className="mb-1 text-sm font-medium text-slate-700">Prioridad</legend>
+              <div className="flex gap-3">
+                {[
+                  { valor: false, etiqueta: 'Normal' },
+                  { valor: true, etiqueta: 'Prioritario (RN/CA4)' },
+                ].map(({ valor, etiqueta }) => (
+                  <label
+                    key={String(valor)}
+                    className={`flex h-11 cursor-pointer items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors ${
+                      prioritario === valor
+                        ? 'border-brand-600 bg-brand-50 text-brand-800 ring-2 ring-brand-600'
+                        : 'border-slate-300 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="prioridad"
+                      className="sr-only"
+                      checked={prioritario === valor}
+                      onChange={() => setPrioritario(valor)}
+                    />
+                    {etiqueta}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <Button type="submit" size="lg" className="md:col-span-2" loading={generando}>
               Generar turno
             </Button>
           </form>
-          <p className="mt-3 text-xs text-slate-500">
-            CA1: seleccione tipo de trámite · CA2: número único · CA3: estado En espera · CA4: prioritario/normal
-          </p>
-        </div>
+        </Card>
 
         {/* Cola */}
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <h2 className="text-lg font-bold mb-4">Cola de turnos</h2>
-          {loading ? (
-            <Loading />
+        <Card className="p-6">
+          <CardHeader
+            titulo="Cola de turnos"
+            descripcion={`${enEspera.length} en espera · ${enAtencion.length} en atención`}
+            accion={
+              <Button variant="ghost" size="sm" onClick={cargarTurnos} aria-label="Actualizar cola">
+                Actualizar
+              </Button>
+            }
+          />
+          {cargandoTurnos ? (
+            <div className="space-y-3">
+              {[0, 1, 2].map((i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
           ) : turnos.length === 0 ? (
-            <EmptyState titulo="Sin turnos en la cola" descripcion="Genere un turno para comenzar." />
+            <EmptyState
+              titulo="La cola está vacía"
+              descripcion="Genera el primer turno del día para comenzar la atención."
+            />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
+            <div className="-mx-2 overflow-x-auto px-2">
+              <table className="table-data">
                 <thead>
-                  <tr className="border-b border-slate-200">
-                    <th className="pb-2 text-slate-500 font-semibold">Número</th>
-                    <th className="pb-2 text-slate-500 font-semibold">Trámite</th>
-                    <th className="pb-2 text-slate-500 font-semibold">Estado</th>
-                    <th className="pb-2 text-slate-500 font-semibold">Prioridad</th>
-                    <th className="pb-2 text-slate-500 font-semibold text-right">Acciones</th>
+                  <tr>
+                    <th scope="col">Número</th>
+                    <th scope="col">Trámite</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Prioridad</th>
+                    <th scope="col" className="text-right">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {turnos.map((t) => (
-                    <tr key={t.id} className="border-b border-slate-100">
-                      <td className="py-2 font-mono">{t.numeroTurno}</td>
-                      <td className="py-2">{t.tipoTramiteNombre}</td>
-                      <td className="py-2"><BadgeEstado estado={t.estado} /></td>
-                      <td className="py-2">{t.prioridad === 'PRIORITARIO' ? '★' : ''}</td>
-                      <td className="py-2 text-right">
+                  {turnos.slice(0, 12).map((t) => (
+                    <tr key={t.id}>
+                      <td className="font-mono font-semibold text-brand-800">{t.numeroTurno}</td>
+                      <td className="text-slate-600">{t.tipoTramiteNombre}</td>
+                      <td>
+                        <BadgeEstado estado={t.estado} />
+                      </td>
+                      <td>
+                        <BadgePrioridad prioritario={t.prioridad === 'PRIORITARIO'} />
+                      </td>
+                      <td className="text-right">
                         {t.estado === 'EN_ESPERA' && (
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => cancelar(t.id)}
-                          >
+                          <Button variant="destructive" size="sm" onClick={() => setTurnoACancelar(t)}>
                             Cancelar
                           </Button>
                         )}
@@ -192,8 +226,19 @@ export default function RecepcionistaPage() {
               </table>
             </div>
           )}
-        </div>
+        </Card>
       </div>
+
+      {turnoACancelar && (
+        <ConfirmDialog
+          titulo="Cancelar turno"
+          mensaje={`¿Seguro que deseas cancelar el turno ${turnoACancelar.numeroTurno}? Esta acción no se puede deshacer.`}
+          confirmarTexto="Sí, cancelar turno"
+          cargando={cancelando}
+          onConfirmar={confirmarCancelacion}
+          onCancelar={() => setTurnoACancelar(null)}
+        />
+      )}
     </div>
   );
 }

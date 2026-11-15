@@ -9,6 +9,7 @@ interface ConfirmDialogProps {
   onConfirmar: () => void;
   onCancelar: () => void;
   destructivo?: boolean;
+  cargando?: boolean;
 }
 
 export function ConfirmDialog({
@@ -19,6 +20,7 @@ export function ConfirmDialog({
   onConfirmar,
   onCancelar,
   destructivo = true,
+  cargando = false,
 }: ConfirmDialogProps) {
   return (
     <Modal
@@ -26,10 +28,10 @@ export function ConfirmDialog({
       onClose={onCancelar}
       pie={
         <>
-          <Button variant="outline" onClick={onCancelar}>
+          <Button variant="outline" onClick={onCancelar} disabled={cargando}>
             {cancelarTexto}
           </Button>
-          <Button variant={destructivo ? 'destructive' : 'primary'} onClick={onConfirmar}>
+          <Button variant={destructivo ? 'destructive' : 'primary'} onClick={onConfirmar} loading={cargando}>
             {confirmarTexto}
           </Button>
         </>

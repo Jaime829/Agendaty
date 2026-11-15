@@ -1,102 +1,120 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { usuariosService } from '@/api';
-import { Button } from '@/components/Button';
-import { Input } from '@/components/Input';
-import { Select } from '@/components/Select';
-import { Alert } from '@/components/Alert';
-import { useAuthContext } from '@/context/AuthContext';
-import { getRouteByRol } from '@/utils/roleRoutes';
+import {
+  Button,
+  Input,
+  Select,
+  Alert,
+  Card,
+  CardHeader,
+  Skeleton,
+  EmptyState,
+} from '@/components';
+import { useRolGuard } from '@/hooks/useRolGuard';
+
+const ROL_LABEL: Record<string, string> = {
+  ROLE_CIUDADANO: 'Ciudadano',
+  ROLE_ASESOR: 'Asesor',
+  ROLE_RECEPCIONISTA: 'Recepcionista',
+  ROLE_COORDINADOR: 'Coordinador',
+  ROLE_ADMINISTRADOR: 'Administrador',
+};
 
 export default function AdministradorPage() {
-  const { user, tieneRol } = useAuthContext();
+  const { esPermitido } = useRolGuard(['ROLE_ADMINISTRADOR']);
   const navigate = useNavigate();
 
   const [usuarios, setUsuarios] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(false);
+  const [cargandoLista, setCargandoLista] = useState(true);
+  const [creando, setCreando] = useState(false);
   const [form, setForm] = useState({ nombre: '', correo: '', password: '', documento: '', telefono: '', rol: 'ROLE_ASESOR' });
 
-  const esAdmin = !!user && tieneRol('ROLE_ADMINISTRADOR');
-
-  const cerrarError = () => {
-    setError(null);
-    setFieldErrors({});
-  };
-
-  useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    if (!tieneRol('ROLE_ADMINISTRADOR')) {
-      navigate(getRouteByRol(user.rol));
-      return;
-    }
-    cargarUsuarios();
-  }, [tieneRol, navigate, user]);
-
-  if (!esAdmin) {
-    return null;
-  }
-
-  const cargarUsuarios = async () => {
-    setLoading(true);
-    setFieldErrors({});
+  const cargarUsuarios = useCallback(async () => {
+    setCargandoLista(true);
     try {
       const data = await usuariosService.listar();
-      setUsuarios(data);
+      setUsuarios(data ?? []);
     } catch (e: any) {
-      setError(e.message || 'Error cargando usuarios');
+      setError(e.message || 'No se pudo cargar la lista de usuarios');
     } finally {
-      setLoading(false);
+      setCargandoLista(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (esPermitido) cargarUsuarios();
+  }, [esPermitido, cargarUsuarios]);
 
   const crearUsuario = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setLoading(true);
+    setFieldErrors({});
+    setCreando(true);
     try {
-      await usuariosService.crear(form);
+      const creado = await usuariosService.crear(form);
+      toast.success(`Usuario ${creado.correo ?? form.correo} creado`);
       setForm({ nombre: '', correo: '', password: '', documento: '', telefono: '', rol: 'ROLE_ASESOR' });
       cargarUsuarios();
-    } catch (e: any) {
-      setError(e.message || 'Error creando usuario');
-      setFieldErrors(e.fieldErrors || {});
+    } catch (err: any) {
+      setError(err.message || 'No se pudo crear el usuario');
+      setFieldErrors(err.fieldErrors || {});
     } finally {
-      setLoading(false);
+      setCreando(false);
     }
   };
 
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Administrador</h1>
-      {error ? (
-        <Alert tipo="error" mensaje={error} fieldErrors={fieldErrors} onCerrar={cerrarError} />
-      ) : null}
+  if (!esPermitido) return null;
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <h2 className="text-lg font-bold mb-4">Gestión de usuarios</h2>
-          <form onSubmit={crearUsuario} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+  const modulos = [
+    { ruta: '/recepcionista', etiqueta: 'Recepción' },
+    { ruta: '/asesor', etiqueta: 'Asesor' },
+    { ruta: '/coordinador', etiqueta: 'Coordinador' },
+    { ruta: '/ciudadano', etiqueta: 'Ciudadano' },
+  ];
+
+  return (
+    <div className="page-gutter mx-auto max-w-7xl pt-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-slate-900">Administración</h1>
+        <p className="text-sm text-slate-500">Gestiona las cuentas internas y de ciudadanos del sistema.</p>
+      </div>
+
+      {error && (
+        <div className="mb-4">
+          <Alert tipo="error" mensaje={error} fieldErrors={fieldErrors} onCerrar={() => { setError(null); setFieldErrors({}); }} />
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <Card className="p-6 lg:col-span-2">
+          <CardHeader
+            titulo="Usuarios del sistema"
+            descripcion="Los ciudadanos también se crean por registro público; aquí puedes crearlos manualmente."
+          />
+          <form onSubmit={crearUsuario} className="grid grid-cols-1 gap-4 border-b border-slate-100 pb-6 md:grid-cols-2 xl:grid-cols-3">
             <Input
-              label="Nombre"
+              label="Nombre completo *"
+              autoComplete="name"
               value={form.nombre}
               onChange={(e) => setForm({ ...form, nombre: e.target.value })}
               required
             />
             <Input
-              label="Correo"
+              label="Correo *"
               type="email"
-              placeholder="usuario@email.com"
+              autoComplete="email"
+              placeholder="nombre@dominio.com"
               value={form.correo}
               onChange={(e) => setForm({ ...form, correo: e.target.value })}
               required
             />
             <Input
-              label="Documento"
+              label="Documento *"
+              inputMode="numeric"
               placeholder="12345678"
               pattern="\d{5,10}"
               title="El documento debe tener entre 5 y 10 dígitos"
@@ -105,7 +123,8 @@ export default function AdministradorPage() {
               required
             />
             <Input
-              label="Teléfono"
+              label="Teléfono *"
+              inputMode="numeric"
               placeholder="3001234567"
               pattern="\d{7,10}"
               title="El teléfono debe tener entre 7 y 10 dígitos"
@@ -114,14 +133,15 @@ export default function AdministradorPage() {
               required
             />
             <Input
-              label="Contraseña"
+              label="Contraseña *"
               type="password"
+              autoComplete="new-password"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               required
             />
             <Select
-              label="Rol"
+              label="Rol *"
               options={[
                 { value: 'ROLE_CIUDADANO', label: 'Ciudadano' },
                 { value: 'ROLE_ASESOR', label: 'Asesor' },
@@ -132,47 +152,60 @@ export default function AdministradorPage() {
               value={form.rol}
               onChange={(e) => setForm({ ...form, rol: e.target.value })}
             />
-            <Button type="submit" loading={loading}>Crear usuario</Button>
+            <Button type="submit" size="lg" className="md:col-span-2 xl:col-span-3" loading={creando}>
+              Crear usuario
+            </Button>
           </form>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead>
-                <tr className="border-b border-slate-200">
-                  <th className="pb-2 text-slate-500 font-semibold">Correo</th>
-                  <th className="pb-2 text-slate-500 font-semibold">Rol</th>
-                  <th className="pb-2 text-slate-500 font-semibold">Nombre</th>
-                </tr>
-              </thead>
-              <tbody>
-                {usuarios.map((u) => (
-                  <tr key={u.id} className="border-b border-slate-100">
-                    <td className="py-2">{u.correo}</td>
-                    <td className="py-2">{u.rol}</td>
-                    <td className="py-2">{u.nombre}</td>
+          {cargandoLista ? (
+            <div className="mt-6 space-y-3">
+              {[0, 1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-11 w-full" />
+              ))}
+            </div>
+          ) : usuarios.length === 0 ? (
+            <div className="mt-6">
+              <EmptyState titulo="Aún no hay usuarios" descripcion="Crea el primer usuario interno con el formulario de arriba." />
+            </div>
+          ) : (
+            <div className="-mx-2 mt-6 overflow-x-auto px-2">
+              <table className="table-data">
+                <thead>
+                  <tr>
+                    <th scope="col">Correo</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Rol</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                </thead>
+                <tbody>
+                  {usuarios.map((u) => (
+                    <tr key={u.id}>
+                      <td className="text-slate-600">{u.correo}</td>
+                      <td className="font-medium text-slate-900">{u.nombre}</td>
+                      <td>
+                        <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                          {ROL_LABEL[u.rol] ?? u.rol}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
 
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <h2 className="text-lg font-bold mb-4">Módulos</h2>
-          <div className="space-y-3">
-            <Button variant="secondary" fullWidth onClick={() => navigate('/recepcionista')}>
-              Recepcionista
-            </Button>
-            <Button variant="secondary" fullWidth onClick={() => navigate('/asesor')}>
-              Asesor
-            </Button>
-            <Button variant="secondary" fullWidth onClick={() => navigate('/coordinador')}>
-              Coordinador
-            </Button>
-            <Button variant="secondary" fullWidth onClick={() => navigate('/ciudadano')}>
-              Ciudadano
-            </Button>
-          </div>
+        <div className="space-y-6">
+          <Card className="p-6">
+            <CardHeader titulo="Módulos" descripcion="Abre cualquier vista de la plataforma." />
+            <div className="space-y-2">
+              {modulos.map(({ ruta, etiqueta }) => (
+                <Button key={ruta} variant="secondary" fullWidth onClick={() => navigate(ruta)}>
+                  {etiqueta}
+                </Button>
+              ))}
+            </div>
+          </Card>
         </div>
       </div>
     </div>
