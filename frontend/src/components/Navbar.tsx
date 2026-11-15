@@ -48,7 +48,9 @@ export function Navbar() {
     };
   }, [menuAbierto]);
 
-  if (!user) return null;
+  // Las páginas públicas (landing, login, registro) tienen su propio encabezado
+  const esRutaPublica = ['/', '/login', '/registro'].includes(location.pathname);
+  if (!user || esRutaPublica) return null;
 
   const esAdmin = user.rol === 'ROLE_ADMINISTRADOR';
   const misItems = items.filter((i) => i.rol === user.rol || esAdmin);
