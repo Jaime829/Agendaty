@@ -145,6 +145,26 @@
 							<goal>report</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>check</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.80</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 
@@ -162,14 +182,23 @@
 				</dependencies>
 				<configuration>
 					<targetClasses>
-						<param>com.proyecto.agendaty.*</param>
+						<param>com.proyecto.agendaty.service.*</param>
 					</targetClasses>
 					<targetTests>
 						<param>com.proyecto.agendaty.*</param>
 					</targetTests>
-					<excludedClasses>
-						<param>com.proyecto.agendaty.config.*</param>
-					</excludedClasses>
+					<excludedMethods>
+						<param>^get[A-Za-z0-9_]*$</param>
+						<param>^set[A-Za-z0-9_]*$</param>
+						<param>^is[A-Za-z0-9_]*$</param>
+						<param>^toString$</param>
+						<param>^hashCode$</param>
+						<param>^equals$</param>
+						<param>^&lt;init&gt;$</param>
+						<param>^lambda\$[0-9]+$</param>
+					</excludedMethods>
+					<coverageThreshold>80</coverageThreshold>
+					<mutationThreshold>50</mutationThreshold>
 					<outputFormats>
 						<outputFormat>XML</outputFormat>
 						<outputFormat>HTML</outputFormat>

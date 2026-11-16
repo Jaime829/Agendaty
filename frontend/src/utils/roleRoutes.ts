@@ -1,11 +1,17 @@
-export const ROLE_ROUTES: Record<string, string> = {
-  ROLE_ADMINISTRADOR: '/administrador',
-  ROLE_COORDINADOR: '/coordinador',
-  ROLE_ASESOR: '/asesor',
-  ROLE_RECEPCIONISTA: '/recepcionista',
-  ROLE_CIUDADANO: '/ciudadano',
-};
-
-export const getRouteByRol = (rol: string | undefined): string => {
-  return rol ? ROLE_ROUTES[rol] || '/' : '/';
+// Fuente única del panel de destino por rol — úsese en navbar, landing, login y guards.
+export const getHomeByRole = (rol: string | undefined): string => {
+  switch (rol) {
+    case 'ROLE_ADMINISTRADOR':
+      return '/administrador';
+    case 'ROLE_COORDINADOR':
+      return '/coordinador';
+    case 'ROLE_ASESOR':
+      return '/asesor';
+    case 'ROLE_RECEPCIONISTA':
+      return '/recepcionista';
+    case 'ROLE_CIUDADANO':
+      return '/ciudadano';
+    default:
+      return '/';
+  }
 };

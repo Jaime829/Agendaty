@@ -197,6 +197,78 @@ class AuthServiceTest {
                 "RA1: un correo ya usado por un asesor debe ser rechazado");
     }
 
+    /* ==================== Verificación completa de campos de entidad ==================== */
+
+    @Test
+    void registrar_guardaTodosLosCamposEnCiudadano() {
+        RegisterRequest request = new RegisterRequest(
+                "Maria Perez", "maria@email.com", "pass123", "11122233", "3005556677", "ROLE_CIUDADANO"
+        );
+
+        when(ciudadanoRepository.existsByCorreo("maria@email.com")).thenReturn(false);
+        when(asesorRepository.existsByCorreo("maria@email.com")).thenReturn(false);
+        when(ciudadanoRepository.existsByDocumento("11122233")).thenReturn(false);
+        when(passwordEncoder.encode("pass123")).thenReturn("hashed");
+        when(ciudadanoRepository.save(any(Ciudadano.class))).thenAnswer(inv -> {
+            Ciudadano c = inv.getArgument(0);
+            c.setId(42);
+            return c;
+        });
+
+        LoginResponse response = authService.registrar(request);
+
+        assertEquals(42, response.id());
+        assertEquals("maria@email.com", response.correo());
+        assertEquals("Maria Perez", response.nombre());
+        assertEquals("ROLE_CIUDADANO", response.rol());
+    }
+
+    @Test
+    void crearUsuarioInterno_adminRegistraAsesor_guardaTodosLosCampos() {
+        RegisterRequest request = new RegisterRequest(
+                "Asesor Uno", "asesor@email.com", "pass123", "87654321", "3009876543", "ROLE_ASESOR"
+        );
+
+        when(ciudadanoRepository.existsByCorreo("asesor@email.com")).thenReturn(false);
+        when(asesorRepository.existsByCorreo("asesor@email.com")).thenReturn(false);
+        when(ciudadanoRepository.existsByDocumento("87654321")).thenReturn(false);
+        when(passwordEncoder.encode("pass123")).thenReturn("hashed");
+        when(asesorRepository.save(any(Asesor.class))).thenAnswer(inv -> {
+            Asesor a = inv.getArgument(0);
+            a.setId(7);
+            return a;
+        });
+
+        LoginResponse response = authService.crearUsuarioInterno(request);
+
+        assertEquals(7, response.id());
+        assertEquals("asesor@email.com", response.correo());
+        assertEquals("ROLE_ASESOR", response.rol());
+    }
+
+    @Test
+    void crearUsuarioInterno_adminRegistraCiudadano_guardaTodosLosCampos() {
+        RegisterRequest request = new RegisterRequest(
+                "Ciudadano Uno", "ciudadano@email.com", "pass123", "11223344", "3001112233", "ROLE_CIUDADANO"
+        );
+
+        when(ciudadanoRepository.existsByCorreo("ciudadano@email.com")).thenReturn(false);
+        when(asesorRepository.existsByCorreo("ciudadano@email.com")).thenReturn(false);
+        when(ciudadanoRepository.existsByDocumento("11223344")).thenReturn(false);
+        when(passwordEncoder.encode("pass123")).thenReturn("hashed");
+        when(ciudadanoRepository.save(any(Ciudadano.class))).thenAnswer(inv -> {
+            Ciudadano c = inv.getArgument(0);
+            c.setId(9);
+            return c;
+        });
+
+        LoginResponse response = authService.crearUsuarioInterno(request);
+
+        assertEquals(9, response.id());
+        assertEquals("ciudadano@email.com", response.correo());
+        assertEquals("ROLE_CIUDADANO", response.rol());
+    }
+
     /* ==================== RA6: Usuario no admin no puede registrar asesor ==================== */
 
     @Test

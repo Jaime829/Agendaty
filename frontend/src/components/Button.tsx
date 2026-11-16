@@ -7,6 +7,27 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean;
 }
 
+const base =
+  'inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors duration-160 ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ' +
+  'disabled:cursor-not-allowed disabled:opacity-50';
+
+const variants: Record<string, string> = {
+  primary: 'bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 focus-visible:ring-brand-600',
+  secondary: 'bg-slate-100 text-slate-900 hover:bg-slate-200 active:bg-slate-300 focus-visible:ring-slate-500',
+  destructive: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 focus-visible:ring-red-600',
+  outline:
+    'border border-slate-300 bg-transparent text-slate-700 hover:bg-slate-100 active:bg-slate-200 focus-visible:ring-brand-600',
+  ghost: 'bg-transparent text-slate-600 hover:bg-slate-100 active:bg-slate-200 focus-visible:ring-slate-500',
+};
+
+// Alturas mínimas ≥ área táctil recomendada (sm excepcional: uso solo donde hay contexto suficiente)
+const sizes: Record<string, string> = {
+  sm: 'h-9 px-3 text-sm',
+  md: 'h-11 px-4 text-sm',
+  lg: 'h-[52px] px-6 text-base',
+};
+
 export function Button({
   children,
   variant = 'primary',
@@ -15,36 +36,24 @@ export function Button({
   fullWidth = false,
   disabled,
   className = '',
+  type = 'button',
   ...props
 }: ButtonProps) {
-  const base = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';
-
-  const variants: Record<string, string> = {
-    primary: 'bg-blue-600 text-white focus:ring-blue-500 hover:bg-blue-700',
-    secondary: 'bg-slate-100 text-slate-900 focus:ring-slate-500 hover:bg-slate-200',
-    destructive: 'bg-red-600 text-white focus:ring-red-500 hover:bg-red-700',
-    outline: 'border border-slate-300 bg-transparent text-slate-700 focus:ring-blue-500 hover:bg-slate-100',
-    ghost: 'bg-transparent text-slate-600 focus:ring-slate-500 hover:bg-slate-100',
-  };
-
-  const sizes: Record<string, string> = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-base',
-  };
-
   return (
     <button
+      type={type}
       className={`${base} ${variants[variant]} ${sizes[size]} ${fullWidth ? 'w-full' : ''} ${className}`}
       disabled={disabled || loading}
+      aria-busy={loading || undefined}
       {...props}
     >
       {loading && (
         <svg
-          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+          className="h-4 w-4 animate-spin"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
+          aria-hidden="true"
         >
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path

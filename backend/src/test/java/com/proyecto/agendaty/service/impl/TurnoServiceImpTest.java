@@ -12,6 +12,7 @@ import com.proyecto.agendaty.exceptions.ResourceNotFoundException;
 import com.proyecto.agendaty.mapper.TurnoMapper;
 import com.proyecto.agendaty.model.enums.EstadoTurno;
 import com.proyecto.agendaty.model.enums.PrioridadTurno;
+import com.proyecto.agendaty.model.enums.RolUsuario;
 import com.proyecto.agendaty.repository.AuditoriaRepository;
 import com.proyecto.agendaty.repository.AsesorRepository;
 import com.proyecto.agendaty.repository.CiudadanoRepository;
@@ -89,6 +90,75 @@ class TurnoServiceImpTest {
     }
 
     /* ==================== CA1-CA4: generar turno ==================== */
+
+    @Test
+    void generarTurno_construyeElTurnoConTodosLosCampos() {
+        TurnoRequest request = new TurnoRequest(1, 10L, false);
+
+        when(ciudadanoRepository.findById(1)).thenReturn(Optional.of(ciudadano));
+        when(tipoTramiteRepository.findById(10L)).thenReturn(Optional.of(tipoTramite));
+        when(turnoRepository.findAll()).thenReturn(List.of());
+        when(turnoRepository.save(any(Turno.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(turnoMapper.toResponse(any(Turno.class))).thenAnswer(inv -> {
+            Turno t = inv.getArgument(0);
+            return new TurnoResponse(t.getId(), t.getNumeroTurno(), t.getEstado(), t.getPrioridad(),
+                    t.getFechaCreacion(), t.getFechaLlamado(), t.getFechaFinEspera(),
+                    1, "Juan Perez", 10L, "Cedula", null, null);
+        });
+
+        service.generarTurno(request, 1);
+
+        ArgumentCaptor<Turno> captor = ArgumentCaptor.forClass(Turno.class);
+        verify(turnoRepository).save(captor.capture());
+        Turno guardado = captor.getValue();
+
+        assertEquals(EstadoTurno.EN_ESPERA, guardado.getEstado(), "CA3: debe quedar en EN_ESPERA");
+        assertNotNull(guardado.getFechaCreacion(), "RN6: fechaCreacion debe estar seteada");
+        assertEquals(ciudadano, guardado.getCiudadano(), "El turno debe pertenecer al ciudadano");
+        assertEquals(tipoTramite, guardado.getTipoTramite(), "El turno debe tener el tipo de trámite");
+        assertEquals(PrioridadTurno.NORMAL, guardado.getPrioridad());
+        assertEquals("CEDN-00001", guardado.getNumeroTurno(), "CA2: número único");
+        verify(authService).validarRolCualquiera(eq(1), any(RolUsuario[].class));
+    }
+
+    @Test
+    void generarTurno_llamarSiguienteVerificadosCamposLlamado() {
+        TurnoRequest request = new TurnoRequest(1, 10L, false);
+
+        Turno espera = new Turno();
+        espera.setId(50L);
+        espera.setEstado(EstadoTurno.EN_ESPERA);
+        espera.setNumeroTurno("CEDN-00050");
+        espera.setPrioridad(PrioridadTurno.NORMAL);
+        espera.setFechaCreacion(java.time.LocalDateTime.now().minusMinutes(10));
+        espera.setCiudadano(ciudadano);
+        espera.setTipoTramite(tipoTramite);
+
+        when(asesorRepository.findById(7)).thenReturn(Optional.of(asesor));
+        when(turnoRepository.existsByEstadoAndAsesor(any(EstadoTurno.class), any(Asesor.class))).thenReturn(false);
+        when(turnoRepository.findByEstadoAndPrioridadOrderByCreacion(EstadoTurno.EN_ESPERA, PrioridadTurno.PRIORITARIO))
+                .thenReturn(List.of());
+        when(turnoRepository.findByEstadoAndPrioridadOrderByCreacion(EstadoTurno.EN_ESPERA, PrioridadTurno.NORMAL))
+                .thenReturn(List.of(espera));
+        when(turnoRepository.findById(50L)).thenReturn(Optional.of(espera));
+        when(turnoRepository.save(any(Turno.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(turnoMapper.toResponse(any(Turno.class))).thenAnswer(inv -> {
+            Turno t = inv.getArgument(0);
+            return new TurnoResponse(t.getId(), t.getNumeroTurno(), t.getEstado(), t.getPrioridad(),
+                    t.getFechaCreacion(), t.getFechaLlamado(), t.getFechaFinEspera(),
+                    1, "Juan Perez", 10L, "Cedula", 7, "Maria Asesora");
+        });
+
+        service.llamarSiguiente(7);
+
+        ArgumentCaptor<Turno> captor = ArgumentCaptor.forClass(Turno.class);
+        verify(turnoRepository).save(captor.capture());
+        Turno bloqueado = captor.getValue();
+
+        assertNotNull(bloqueado.getFechaLlamado(), "Llamar al turno registra la fecha de llamado");
+        assertEquals(asesor, bloqueado.getAsesor(), "El turno debe quedar asignado al asesor");
+        assertEquals(EstadoTurno.LLAMADO, bloqueado.getEstado());
+    }
 
     @Test
     void generarTurno_deberiaPermitirSeleccionarTipoTramite_yQuedarEnEspera_CA1_CA3() {

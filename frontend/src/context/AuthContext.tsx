@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
 import { authService } from '@/api/auth';
 import type { AuthUser } from '@/types';
 
@@ -12,17 +13,32 @@ const AuthContext = createContext<{
   tieneAlgunaRol: (roles: string[]) => boolean;
 } | null>(null);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
+// Lectura síncrona y tolerante a datos corruptos (una sola fuente de verdad)
+const leerSesionInicial = (): AuthUser | null => {
+  const storedUser = authService.getUser();
+  const token = authService.getToken();
+  return storedUser && token ? storedUser : null;
+};
 
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<AuthUser | null>(leerSesionInicial);
+  const [loading] = useState(false);
+
+  // Sincroniza la sesión entre pestañas del mismo origen:
+  // 'storage' cubre escrituras desde otra pestaña, 'focus' cubre re-leer al volver a la pestaña.
   useEffect(() => {
-    const u = authService.getUser();
-    const token = authService.getToken();
-    if (u && token) {
-      setUser(u);
-    }
-    setLoading(false);
+    const refrescar = () => setUser(leerSesionInicial());
+    const onKey = (key: string | null) => {
+      if (key === null || key === 'user' || key === 'token') refrescar();
+    };
+    const onStorage = (e: StorageEvent) => onKey(e.key);
+    const onFocus = () => refrescar();
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('focus', onFocus);
+    };
   }, []);
 
   const login = useCallback((userData: AuthUser) => {
@@ -34,6 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(() => {
     authService.logout();
     setUser(null);
+    toast.success('Sesión cerrada');
   }, []);
 
   const isAuthenticated = !!user;
