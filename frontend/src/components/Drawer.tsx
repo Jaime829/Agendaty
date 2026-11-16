@@ -9,10 +9,12 @@ interface DrawerProps {
 }
 
 export function Drawer({ titulo, descripcion, onClose, children, pie }: DrawerProps) {
-  const cierreRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    cierreRef.current?.focus();
+    // Enfocar el contenedor del diálogo (no el botón de cerrar) para evitar
+    // que se muestre el anillo de foco del botón "×" al pulsar cualquier tecla.
+    panelRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
@@ -29,10 +31,12 @@ export function Drawer({ titulo, descripcion, onClose, children, pie }: DrawerPr
     <div className="fixed inset-0 z-modal flex justify-end" role="presentation">
       <div className="absolute inset-0 bg-slate-900/50 animate-fade-in" onClick={onClose} aria-hidden="true" />
       <div
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="drawer-titulo"
-        className="relative z-10 flex h-full w-full max-w-lg flex-col overflow-y-auto bg-white shadow-pop animate-rise-in"
+        tabIndex={-1}
+        className="relative z-10 flex h-full w-full max-w-lg flex-col overflow-y-auto bg-white shadow-pop animate-rise-in focus:outline-none"
       >
         <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur">
           <div>
@@ -42,7 +46,6 @@ export function Drawer({ titulo, descripcion, onClose, children, pie }: DrawerPr
             {descripcion && <p className="mt-0.5 text-sm text-slate-500">{descripcion}</p>}
           </div>
           <button
-            ref={cierreRef}
             onClick={onClose}
             aria-label="Cerrar panel"
             className="rounded-md px-2 text-2xl leading-none text-slate-400 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
