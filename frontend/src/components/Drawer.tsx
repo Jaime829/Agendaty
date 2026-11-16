@@ -10,13 +10,18 @@ interface DrawerProps {
 
 export function Drawer({ titulo, descripcion, onClose, children, pie }: DrawerProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef(onClose);
 
+  // Mantener referencia fresca del callback sin re-registrar el listener de teclado
   useEffect(() => {
-    // Enfocar el contenedor del diálogo (no el botón de cerrar) para evitar
-    // que se muestre el anillo de foco del botón "×" al pulsar cualquier tecla.
+    closeRef.current = onClose;
+  }, [onClose]);
+
+  // Ejecutar solo al montar: la referencia onClose cambia en cada render del padre
+  useEffect(() => {
     panelRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') closeRef.current();
     };
     document.addEventListener('keydown', onKey);
     const previo = document.body.style.overflow;
@@ -25,7 +30,7 @@ export function Drawer({ titulo, descripcion, onClose, children, pie }: DrawerPr
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = previo;
     };
-  }, [onClose]);
+  }, []);
 
   return (
     <div className="fixed inset-0 z-modal flex justify-end" role="presentation">

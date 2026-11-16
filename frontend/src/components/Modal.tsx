@@ -9,10 +9,18 @@ interface ModalProps {
 
 export function Modal({ titulo, onClose, children, pie }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef(onClose);
+
+  // Mantener referencia fresca del callback sin re-registrar el listener de teclado
+  useEffect(() => {
+    closeRef.current = onClose;
+  }, [onClose]);
+
+  // Ejecutar solo al montar: onClose del padre cambia en cada render
   useEffect(() => {
     panelRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') closeRef.current();
     };
     document.addEventListener('keydown', onKey);
     const previo = document.body.style.overflow;
@@ -21,7 +29,7 @@ export function Modal({ titulo, onClose, children, pie }: ModalProps) {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = previo;
     };
-  }, [onClose]);
+  }, []);
 
   return (
     <div className="fixed inset-0 z-modal flex items-end justify-center sm:items-center" role="presentation">
