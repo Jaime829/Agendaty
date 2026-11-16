@@ -62,7 +62,7 @@ export function Navbar() {
         aria-label={i.label}
         onClick={() => setMenuAbierto(false)}
         className={({ isActive }) =>
-          `flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+          `flex focus-ring items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
             isActive
               ? 'bg-brand-50 text-brand-800 ring-1 ring-inset ring-brand-200'
               : 'text-slate-600 hover:bg-slate-100 hover:text-brand-800'

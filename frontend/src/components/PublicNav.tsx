@@ -31,7 +31,7 @@ export function PublicNav() {
             <>
               <Link
                 to={getHomeByRole(user?.rol)}
-                className="inline-flex h-11 items-center rounded-md bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+                className="inline-flex h-11 items-center rounded-md bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-ring"
               >
                 Ir a mi panel
               </Link>
@@ -39,12 +39,12 @@ export function PublicNav() {
             </>
           ) : (
             <>
-              <Link to="/login" className="rounded-md px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
+              <Link to="/login" className="rounded-md px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 focus-ring">
                 Iniciar sesión
               </Link>
               <Link
                 to="/registro"
-                className="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+                className="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 focus-ring"
               >
                 Crear cuenta
               </Link>

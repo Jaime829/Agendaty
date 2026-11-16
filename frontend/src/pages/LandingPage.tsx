@@ -85,13 +85,13 @@ export default function LandingPage() {
                 <>
                   <Link
                     to={panelDeMiRol}
-                    className="inline-flex h-[52px] items-center justify-center gap-2 rounded-md bg-brand-600 px-6 text-base font-semibold text-white transition-colors hover:bg-brand-700"
+                    className="inline-flex h-[52px] items-center justify-center gap-2 rounded-md bg-brand-600 px-6 text-base font-semibold text-white transition-colors hover:bg-brand-700 focus-ring"
                   >
                     Ir a mi panel <ArrowRight className="h-5 w-5" aria-hidden="true" />
                   </Link>
                   <a
                     href="#como-funciona"
-                    className="inline-flex h-[52px] items-center justify-center rounded-md border border-slate-300 bg-white px-6 text-base font-semibold text-slate-800 transition-colors hover:bg-slate-50"
+                    className="inline-flex h-[52px] items-center justify-center rounded-md border border-slate-300 bg-white px-6 text-base font-semibold text-slate-800 transition-colors hover:bg-slate-50 focus-ring"
                   >
                     Ver cómo funciona
                   </a>
@@ -100,13 +100,13 @@ export default function LandingPage() {
                 <>
                   <Link
                     to="/registro"
-                    className="inline-flex h-[52px] items-center justify-center gap-2 rounded-md bg-brand-600 px-6 text-base font-semibold text-white transition-colors hover:bg-brand-700"
+                    className="inline-flex h-[52px] items-center justify-center gap-2 rounded-md bg-brand-600 px-6 text-base font-semibold text-white transition-colors hover:bg-brand-700 focus-ring"
                   >
                     Crear mi cuenta <ArrowRight className="h-5 w-5" aria-hidden="true" />
                   </Link>
                   <Link
                     to="/login"
-                    className="inline-flex h-[52px] items-center justify-center rounded-md border border-slate-300 bg-white px-6 text-base font-semibold text-slate-800 transition-colors hover:bg-slate-50"
+                    className="inline-flex h-[52px] items-center justify-center rounded-md border border-slate-300 bg-white px-6 text-base font-semibold text-slate-800 transition-colors hover:bg-slate-50 focus-ring"
                   >
                     Iniciar sesión
                   </Link>
@@ -228,7 +228,7 @@ export default function LandingPage() {
           <div className="mt-10 divide-y divide-slate-200 rounded-xl border border-slate-200">
             {faqs.map(({ pregunta, respuesta }) => (
               <details key={pregunta} className="group px-6 py-4">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-slate-900 [&::-webkit-details-marker]:hidden">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-md py-1 font-semibold text-slate-900 focus-ring [&::-webkit-details-marker]:hidden">
                   {pregunta}
                   <span className="text-slate-400 transition-transform group-open:rotate-45" aria-hidden="true">+</span>
                 </summary>
@@ -251,14 +251,14 @@ export default function LandingPage() {
           ) : isAuthenticated ? (
             <Link
               to={panelDeMiRol}
-              className="mt-8 inline-flex items-center gap-2 rounded-md bg-white px-8 py-4 text-base font-semibold text-brand-800 transition-colors hover:bg-brand-50"
+              className="mt-8 inline-flex items-center gap-2 rounded-md bg-white px-8 py-4 text-base font-semibold text-brand-800 transition-colors hover:bg-brand-50 focus-ring"
             >
               Ir a mi panel <ArrowRight className="h-5 w-5" aria-hidden="true" />
             </Link>
           ) : (
             <Link
               to="/registro"
-              className="mt-8 inline-flex items-center gap-2 rounded-md bg-white px-8 py-4 text-base font-semibold text-brand-800 transition-colors hover:bg-brand-50"
+              className="mt-8 inline-flex items-center gap-2 rounded-md bg-white px-8 py-4 text-base font-semibold text-brand-800 transition-colors hover:bg-brand-50 focus-ring"
             >
               Crear mi cuenta <ArrowRight className="h-5 w-5" aria-hidden="true" />
             </Link>
