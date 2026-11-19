@@ -1,67 +1,38 @@
-version: "3.8"
-
 services:
   # --------------------------------------------------------------------------
-  # Base de datos (PostgreSQL en producción)
-  # --------------------------------------------------------------------------
-  db:
-    image: postgres:16-alpine
-    container_name: agendaty-db
-    environment:
-      POSTGRES_DB: agendaty
-      POSTGRES_USER: agendaty
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-agendaty}
-    ports:
-      - "5432:5432"
-    volumes:
-      - agendaty_db_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U agendaty -d agendaty"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # --------------------------------------------------------------------------
-  # Backend Spring Boot
+  # Backend Spring Boot con H2 en memoria (perfil de desarrollo)
   # --------------------------------------------------------------------------
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: agendaty-backend
-    depends_on:
-      db:
-        condition: service_healthy
     environment:
-      SPRING_PROFILES_ACTIVE: prod
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/agendaty
-      SPRING_DATASOURCE_USERNAME: agendaty
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-agendaty}
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRATION: "86400000"
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@turnos.local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin123*}
     ports:
       - "8080:8080"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/tipos-tramite"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/8080'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   # --------------------------------------------------------------------------
-  # Frontend React (servido por nginx en producción)
+  # Frontend React servido por nginx
+  # VITE_API_URL se fija en el build de Vite, no en tiempo de ejecución
   # --------------------------------------------------------------------------
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8080}
+        VITE_USE_MOCK: "false"
     container_name: agendaty-frontend
     depends_on:
-      - backend
-    environment:
-      VITE_API_URL: http://localhost:8080/api/v1
+      backend:
+        condition: service_healthy
     ports:
       - "5173:80"
-
-volumes:
-  agendaty_db_data:

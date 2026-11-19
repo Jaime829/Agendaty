@@ -193,6 +193,7 @@ Los requisitos adicionales son RA1 (registro público con rol forzado), RA2 (log
 | spring-security-crypto | Gestionado por Spring Boot | Hash BCrypt de contraseñas |
 | JUnit 5 y Mockito | Incluidos en `spring-boot-starter-test` | Pruebas unitarias |
 | JaCoCo, PIT y SonarQube | 0.8.14, 1.30.0, 4.0.0.4121 | Cobertura, mutaciones y análisis estático |
+| springdoc-openapi | 3.2.0 | Documentación OpenAPI y Swagger UI |
 
 ### Frontend
 
@@ -227,7 +228,7 @@ cd backend
 ./mvnw spring-boot:run
 ```
 
-La API queda disponible en `http://localhost:8080`. La consola H2 se sirve en `http://localhost:8080/h2-console` con JDBC `jdbc:h2:mem:agendaty`, usuario `sa` y contraseña vacía. Los datos se pierden al reiniciar el proceso.
+La API queda disponible en `http://localhost:8080`. La documentación interactiva se sirve en `http://localhost:8080/swagger-ui.html` y la especificación OpenAPI en `http://localhost:8080/v3/api-docs`. La consola H2 está en `http://localhost:8080/h2-console` con JDBC `jdbc:h2:mem:agendaty`, usuario `sa` y contraseña vacía. Los datos se pierden al reiniciar el proceso.
 
 El administrador semilla lee `ADMIN_EMAIL` y `ADMIN_PASSWORD` del entorno del proceso. Si no las defines, se usan los valores de desarrollo.
 
@@ -282,7 +283,13 @@ Cambia estas credenciales antes de exponer el sistema fuera del entorno de desar
 
 ### Docker
 
-El repositorio incluye `docker-compose.yml` y un `Dockerfile` por módulo. El archivo de Compose refleja un diseño anterior con JWT y prefijo `/api/v1`, que no coincide con la API actual. Ejecuta los módulos de forma local con los comandos anteriores hasta que ese archivo se actualice.
+El repositorio incluye `docker-compose.yml` y un `Dockerfile` por módulo. Compose levanta el backend con H2 en memoria y el frontend con nginx, sin servicios de base de datos externos. Las rutas, el prefijo de la API y las credenciales coinciden con la ejecución local.
+
+```powershell
+docker compose up --build
+```
+
+El frontend usa `VITE_API_URL` y `VITE_USE_MOCK=false` como argumentos de construcción, porque Vite los incorpora al bundle durante el `build`. Puedes cambiarlos con variables de entorno antes de ejecutar Compose. La API queda en `http://localhost:8080` y la aplicación en `http://localhost:5173`. Los datos de H2 se pierden al recrear el contenedor del backend.
 
 ## Recorridos por rol
 
@@ -445,9 +452,9 @@ Estas decisiones explican por qué el proyecto tiene la forma que tiene. Se nume
 - No existen `PATCH` ni `DELETE /admin/usuarios`, ni cambio de contraseña ni activación de usuarios.
 - RN2 requiere que la recepcionista o el administrador llame al endpoint explícito.
 - `GET /asesores` puede fallar cuando un asesor no tiene ventanilla asignada; el frontend degrada esa sección.
-- `application.properties` define la ruta de Swagger UI, pero `pom.xml` no declara la dependencia `springdoc`.
-- `docker-compose.yml` usa un contrato antiguo con JWT y `/api/v1`; no refleja la API actual.
 - `VITE_USE_MOCK=true` cubre solo login y registro; el resto de pantallas dependen del backend.
+- El despliegue con Compose usa H2 en memoria, así que los datos no persisten al recrear el contenedor.
+- La documentación OpenAPI está habilitada por defecto; en un despliegue real conviene desactivarla con `springdoc.api-docs.enabled=false` y `springdoc.swagger-ui.enabled=false`.
 - La interfaz no incluye modo oscuro.
 - `backend/README.md` y `frontend/README.md` son guías de módulo y conservan referencias de versiones anteriores. Este README es la fuente vigente.
 
@@ -457,7 +464,7 @@ Estas decisiones explican por qué el proyecto tiene la forma que tiene. Se nume
 Agendaty/
 ├── backend/          API REST Spring Boot, wrapper Maven, configuración y pruebas
 ├── frontend/         Cliente React + TypeScript + Vite
-├── docker-compose.yml  Despliegue heredado, pendiente de alinear
+├── docker-compose.yml  Backend con H2 y frontend con nginx
 ├── CHANGELOG.md      Historial de versiones
 └── README.md         Esta documentación
 ```
