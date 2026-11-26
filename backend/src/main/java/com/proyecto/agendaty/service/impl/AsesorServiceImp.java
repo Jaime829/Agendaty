@@ -7,6 +7,7 @@ import com.proyecto.agendaty.entity.Ventanilla;
 import com.proyecto.agendaty.exceptions.BadRequestException;
 import com.proyecto.agendaty.exceptions.ResourceNotFoundException;
 import com.proyecto.agendaty.mapper.AsesorMapper;
+import com.proyecto.agendaty.model.enums.RolUsuario;
 import com.proyecto.agendaty.repository.AsesorRepository;
 import com.proyecto.agendaty.repository.CiudadanoRepository;
 import com.proyecto.agendaty.repository.VentanillaRepository;
@@ -42,6 +43,8 @@ public class AsesorServiceImp implements AsesorService {
         Asesor asesorEntity = asesorMapper.toEntity(asesor);
 
         assert asesorEntity != null;
+        asesorEntity.setRol(RolUsuario.ROLE_ASESOR);
+        asesorEntity.setDisponible(true);
         asesorEntity.setVentanillaActual(ventanilla);
 
         Asesor asesorSave = asesorRepository.save(asesorEntity);

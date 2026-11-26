@@ -306,7 +306,7 @@ El destino de cada rol se calcula en una sola función, `getHomeByRole`, que reu
 
 ## API REST
 
-La base es `http://localhost:8080` y las rutas son cortas, sin prefijo de versión. Las peticiones protegidas envían el header `X-Usuario-Id` con el identificador del usuario. El cuerpo de error sigue el formato `ErrorResponse(timeStamp, status, errorMessage, errorsDetails)`.
+La base es `http://localhost:8080` y las rutas son cortas, sin prefijo de versión. Las peticiones protegidas envían el header `X-Usuario-Id` con el identificador del usuario. Los endpoints de administración también aceptan el alias heredado `X_Usuario_Id` con guion bajo. El cuerpo de error sigue el formato `ErrorResponse(timeStamp, status, errorMessage, errorsDetails)`.
 
 ### Autenticación y administración
 
@@ -387,7 +387,7 @@ La validación de entrada usa Bean Validation en los DTO y comprobaciones de reg
 
 ```powershell
 cd backend
-./mvnw test           # 165 pruebas JUnit 5 y Mockito
+./mvnw test           # 168 pruebas JUnit 5 y Mockito
 ./mvnw verify         # Pruebas más comprobación de cobertura JaCoCo
 
 cd ../frontend
@@ -396,7 +396,7 @@ npm run lint          # ESLint, cero advertencias
 npm run build         # Genera dist/
 ```
 
-La ejecución actual de backend registra 165 pruebas, cero fallos y 88,7 % de cobertura de líneas con JaCoCo. El plugin `jacoco:check` exige al menos 80 % de líneas durante `verify`. PIT está configurado con umbral de cobertura 80 y umbral de mutación 50 sobre los servicios; se ejecuta con `./mvnw pitest:mutationCoverage`. SonarQube se configura con `./mvnw sonar:sonar` y consume los informes de JaCoCo y PIT.
+La ejecución actual de backend registra 168 pruebas, cero fallos y 89,5 % de cobertura de líneas con JaCoCo. El plugin `jacoco:check` exige al menos 80 % de líneas durante `verify`. PIT está configurado con umbral de cobertura 80 y umbral de mutación 50 sobre los servicios; se ejecuta con `./mvnw pitest:mutationCoverage`. SonarQube se configura con `./mvnw sonar:sonar` y consume los informes de JaCoCo y PIT.
 
 Las pruebas del backend siguen Arrange-Act-Assert, usan nombres descriptivos en español y un reloj inyectable para los cálculos de tiempo. La trazabilidad de requisitos queda resumida así:
 
@@ -443,15 +443,14 @@ Estas decisiones explican por qué el proyecto tiene la forma que tiene. Se nume
 
 - **ADR-015**: el contrato de reportes se documenta con los campos reales del backend.
 - **ADR-016**: el panel de usuarios omite editar, desactivar y restablecer contraseña porque esos verbos no existen.
-- **ADR-019**: si `GET /asesores` falla, el monitor oculta la carga por asesor y sigue funcionando.
+- **ADR-019**: el monitor de coordinador degrada solo la sección de carga si falla `GET /asesores`; el mapper devuelve `numeroVentanilla: null` cuando el asesor no tiene ventanilla.
 
 ## Limitaciones conocidas
 
 - La base de datos H2 es en memoria: los datos desaparecen al reiniciar el backend.
-- `X-Usuario-Id` no es un mecanismo de autenticación seguro; el esquema está pensado para aprendizaje.
+- `X-Usuario-Id` no es un mecanismo de autenticación seguro; el esquema está pensado para aprendizaje y no todos los endpoints comprueban el rol.
 - No existen `PATCH` ni `DELETE /admin/usuarios`, ni cambio de contraseña ni activación de usuarios.
 - RN2 requiere que la recepcionista o el administrador llame al endpoint explícito.
-- `GET /asesores` puede fallar cuando un asesor no tiene ventanilla asignada; el frontend degrada esa sección.
 - `VITE_USE_MOCK=true` cubre solo login y registro; el resto de pantallas dependen del backend.
 - El despliegue con Compose usa H2 en memoria, así que los datos no persisten al recrear el contenedor.
 - La documentación OpenAPI está habilitada por defecto; en un despliegue real conviene desactivarla con `springdoc.api-docs.enabled=false` y `springdoc.swagger-ui.enabled=false`.

@@ -52,7 +52,7 @@ class ControladoresTest {
 
         AdminController controller = new AdminController(authService);
 
-        ResponseEntity<List<LoginResponse>> r = controller.listarUsuarios(1);
+        ResponseEntity<List<LoginResponse>> r = controller.listarUsuarios(1, null);
 
         assertEquals(HttpStatus.OK, r.getStatusCode());
         assertEquals(1, r.getBody().size());
@@ -69,10 +69,24 @@ class ControladoresTest {
 
         AdminController controller = new AdminController(authService);
 
-        ResponseEntity<LoginResponse> r = controller.registrarUsuarioInterno(1, req);
+        ResponseEntity<LoginResponse> r = controller.registrarUsuarioInterno(1, null, req);
 
         assertEquals(HttpStatus.CREATED, r.getStatusCode());
         assertEquals("ROLE_ASESOR", r.getBody().rol());
+    }
+
+    @Test
+    void adminController_aceptaHeaderHeredadoConGuionBajo() {
+        AuthService authService = mock(AuthService.class);
+        doNothing().when(authService).validarRol(anyInt(), any(RolUsuario.class));
+        when(authService.listarTodosLosUsuarios()).thenReturn(List.of());
+
+        AdminController controller = new AdminController(authService);
+
+        ResponseEntity<List<LoginResponse>> r = controller.listarUsuarios(null, 1);
+
+        assertEquals(HttpStatus.OK, r.getStatusCode());
+        verify(authService).validarRol(1, RolUsuario.ROLE_ADMINISTRADOR);
     }
 
     /* ==================== AsesorController ==================== */

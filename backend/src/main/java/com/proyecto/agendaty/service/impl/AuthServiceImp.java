@@ -162,11 +162,13 @@ public class AuthServiceImp implements AuthService {
         List<LoginResponse> todos = new ArrayList<>();
 
         for (Ciudadano c : ciudadanos) {
-            todos.add(new LoginResponse(c.getId(), c.getNombre(), c.getCorreo(), c.getRol().name()));
+            todos.add(new LoginResponse(c.getId(), c.getNombre(), c.getCorreo(),
+                    c.getRol() == null ? null : c.getRol().name()));
         }
 
         for (Asesor a : asesores) {
-            todos.add(new LoginResponse(a.getId(), a.getNombre(), a.getCorreo(), a.getRol().name()));
+            todos.add(new LoginResponse(a.getId(), a.getNombre(), a.getCorreo(),
+                    a.getRol() == null ? null : a.getRol().name()));
         }
 
         return todos;
