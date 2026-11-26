@@ -307,4 +307,21 @@ class AuthServiceTest {
         // Verificar que se llamó a passwordEncoder.encode (BCrypt)
         verify(passwordEncoder).encode("pass123");
     }
+
+    @Test
+    void listarTodosLosUsuarios_asesorSinRol_noLanzaNullPointerException() {
+        Asesor asesor = new Asesor();
+        asesor.setId(9);
+        asesor.setNombre("Asesor heredado");
+        asesor.setCorreo("legacy@turnos.local");
+
+        when(ciudadanoRepository.findAll()).thenReturn(java.util.List.of());
+        when(asesorRepository.findAll()).thenReturn(java.util.List.of(asesor));
+
+        var usuarios = authService.listarTodosLosUsuarios();
+
+        assertEquals(1, usuarios.size());
+        assertEquals("Asesor heredado", usuarios.get(0).nombre());
+        assertNull(usuarios.get(0).rol());
+    }
 }

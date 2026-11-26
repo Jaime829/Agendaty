@@ -7,6 +7,7 @@ import com.proyecto.agendaty.entity.Ventanilla;
 import com.proyecto.agendaty.exceptions.BadRequestException;
 import com.proyecto.agendaty.exceptions.ResourceNotFoundException;
 import com.proyecto.agendaty.mapper.AsesorMapper;
+import com.proyecto.agendaty.model.enums.RolUsuario;
 import com.proyecto.agendaty.repository.AsesorRepository;
 import com.proyecto.agendaty.repository.VentanillaRepository;
 import org.junit.jupiter.api.Test;
@@ -82,6 +83,8 @@ class AsesorServiceImpTest {
         assertEquals("María", r.getNombre());
         assertEquals(5, r.getNumeroVentanilla());
         assertEquals(ventanilla, entidad.getVentanillaActual());
+        assertEquals(RolUsuario.ROLE_ASESOR, entidad.getRol());
+        assertEquals(true, entidad.getDisponible());
     }
 
     @Test

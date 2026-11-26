@@ -12,7 +12,11 @@ public class AsesorMapper {
 
         if (asesor == null) return null;
 
-        return new AsesorResponse(asesor.getId(), asesor.getNombre(), asesor.getDisponible(), asesor.getVentanillaActual().getNumero());
+        Integer numeroVentanilla = asesor.getVentanillaActual() == null
+                ? null
+                : asesor.getVentanillaActual().getNumero();
+
+        return new AsesorResponse(asesor.getId(), asesor.getNombre(), asesor.getDisponible(), numeroVentanilla);
     }
 
     public Asesor toEntity(AsesorRequest asesorRequest) {
